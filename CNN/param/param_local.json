@@ -1,0 +1,14 @@
+{
+	"optim":{
+		"learning_rate": 0.000001,
+    	"wd": 0.0,
+		"momentum": 0.95,
+		"nesterov": 1,
+		"num_epochs": 500
+
+	},
+	"model":{
+		"per_layer": [201, 50, 200, 150, 50, 1]
+
+	}
+}
