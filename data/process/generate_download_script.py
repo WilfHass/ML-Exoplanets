@@ -13,13 +13,10 @@
 # limitations under the License.
 
 r"""Generates a bash script for downloading light curves.
-
 The input to this script is a CSV file of Kepler targets, for example the DR24
 TCE table, which can be downloaded in CSV format from the NASA Exoplanet Archive
 at:
-
   https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=q1_q17_dr24_tce
-
 Example usage:
   python generate_download_script.py \
     --kepler_csv_file=dr24_tce.csv \
