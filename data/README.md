@@ -1,5 +1,6 @@
 # Getting the Data
 ## To use Our Code
+You need wget and tensorflow to run these scripts
 ### Changing size of dataset
 ```sh
 python reduce_dataset.py --num [insert integer for dataset size]
