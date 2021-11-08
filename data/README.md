@@ -3,7 +3,12 @@
 You need wget and tensorflow to run these scripts
 ### Changing size of dataset
 ```sh
+# Reduce the data set first
 python reduce_dataset.py --num [insert integer for dataset size]
+
+# Get the Kepler data
+./create_kepler_script.sh
+
 ```
 For some reason, this isn't linear (when num is 500, there's 301 targets, num=100 45 targets, num=150 77 targets)
 
@@ -15,7 +20,7 @@ python process/generate_download_script.py --kepler_csv_file=dr24_tce.csv --down
 Creates the fits files in the kepler/ directory
 
 
-## README for The Paper's Code
+## README for The Paper's Code (Used only as reference)
 
 ### Download the Kepler Data
 To create our training set, the first step is to download the list of labeled TCEs that will comprise the training set. You can download the DR24 TCE Table in CSV format from the [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=q1_q17_dr24_tce). Ensure the following columns are selected:
