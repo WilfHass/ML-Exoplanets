@@ -1,4 +1,4 @@
-# Download compressed archive (~105.7MB).
+# Download compressed archive (~105.7MB). DOESN'T WORK
 # This method currently does not work.
 wget https://storage.googleapis.com/kepler-ml/astronet/data/kepler/kepler-tce-tfrecords-20180220.tar.gz
 
