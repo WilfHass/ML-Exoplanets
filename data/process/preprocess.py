@@ -30,17 +30,14 @@ from third_party.kepler_spline import kepler_spline
 
 def read_light_curve(kepid, kepler_data_dir):
   """Reads a Kepler light curve.
-
   Args:
     kepid: Kepler id of the target star.
     kepler_data_dir: Base directory containing Kepler data. See
       kepler_io.kepler_filenames().
-
   Returns:
     all_time: A list of numpy arrays; the time values of the raw light curve.
     all_flux: A list of numpy arrays corresponding to the time arrays in
         all_time.
-
   Raises:
     IOError: If the light curve files for this Kepler ID cannot be found.
   """
@@ -55,12 +52,10 @@ def read_light_curve(kepid, kepler_data_dir):
 
 def process_light_curve(all_time, all_flux):
   """Removes low-frequency variability from a light curve.
-
   Args:
     all_time: A list of numpy arrays; the time values of the raw light curve.
     all_flux: A list of numpy arrays corresponding to the time arrays in
       all_time.
-
   Returns:
     time: 1D NumPy array; the time values of the light curve.
     flux: 1D NumPy array; the normalized flux values of the light curve.
@@ -94,13 +89,11 @@ def process_light_curve(all_time, all_flux):
 
 def phase_fold_and_sort_light_curve(time, values, period, t0):
   """Phase folds a light curve and sorts by ascending time.
-
   Args:
     time: 1D NumPy array of time values.
     values: N-dimensional NumPy array with the same length as time.
     period: A positive real scalar; the period to fold over.
     t0: The center of the resulting folded vector; this value is mapped to 0.
-
   Returns:
     folded_time: 1D NumPy array of phase folded time values in
         [-period / 2, period / 2), where 0 corresponds to t0 in the original
@@ -127,7 +120,6 @@ def generate_view(time,
                   t_max,
                   normalize=True):
   """Generates a view of a phase-folded and binned light curve.
-
   Args:
     time: 1D NumPy array of time values, sorted in ascending order.
     values: N-dimensional NumPy array with the same length as time.
@@ -136,7 +128,6 @@ def generate_view(time,
     t_min: The inclusive leftmost value to consider on the time axis.
     t_max: The exclusive rightmost value to consider on the time axis.
     normalize: Whether to center the median at 0 and minimum value at -1.
-
   Returns:
     NumPy array of length num_bins containing the aggregated values in uniformly
     spaced bins on the phase-folded time axis.
@@ -155,17 +146,14 @@ def generate_view(time,
 
 def global_view(time, values, period, num_bins=2001, bin_width_factor=1 / 2001):
   """Generates a 'global view' of a phase folded light curve.
-
   See Section 3.3 of Shallue & Vanderburg, 2018, The Astronomical Journal.
   http://iopscience.iop.org/article/10.3847/1538-3881/aa9e09/meta
-
   Args:
     time: 1D NumPy array of time values, sorted in ascending order.
     values: N-dimensional NumPy array with the same length as time.
     period: The period of the event (in days).
     num_bins: The number of intervals to divide the time axis into.
     bin_width_factor: Width of the bins, as a fraction of period.
-
   Returns:
     NumPy array of length num_bins containing the aggregated values in uniformly
     spaced bins on the phase-folded time axis.
@@ -187,10 +175,8 @@ def local_view(time,
                bin_width_factor=0.16,
                num_durations=4):
   """Generates a 'local view' of a phase folded light curve.
-
   See Section 3.3 of Shallue & Vanderburg, 2018, The Astronomical Journal.
   http://iopscience.iop.org/article/10.3847/1538-3881/aa9e09/meta
-
   Args:
     time: 1D NumPy array of time values, sorted in ascending order.
     values: N-dimensional NumPy array with the same length as time.
@@ -200,7 +186,6 @@ def local_view(time,
     bin_width_factor: Width of the bins, as a fraction of duration.
     num_durations: The number of durations to consider on either side of 0 (the
       event is assumed to be centered at 0).
-
   Returns:
     NumPy array of length num_bins containing the aggregated values in uniformly
     spaced bins on the phase-folded time axis.
@@ -216,13 +201,11 @@ def local_view(time,
 
 def generate_example_for_tce(time, flux, tce):
   """Generates a tf.train.Example representing an input TCE.
-
   Args:
     time: 1D NumPy array; the time values of the light curve.
     flux: 1D NumPy array; the normalized flux values of the light curve.
     tce: Dict-like object containing at least 'tce_period', 'tce_duration', and
       'tce_time0bk'. Additional items are included as features in the output.
-
   Returns:
     A tf.train.Example containing features 'global_view', 'local_view', and all
     values present in `tce`.
