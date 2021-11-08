@@ -1,5 +1,5 @@
-## Getting the Data
-### To use Our Code
+# Getting the Data
+# To use Our Code
 ## Changing size of dataset
 ```sh
 python reduce_dataset.py --num [insert integer for dataset size]
