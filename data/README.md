@@ -1,7 +1,10 @@
 # Getting the Data
 ## To use Our Code
 You need wget and tensorflow to run these scripts
-### Changing size of dataset
+
+### Getting the Kepler data
+The dr24 data is included since it is small. Use the following comman in the process folder to get the kepler data.
+
 ```sh
 # Get the Kepler data
 ./create_kepler_script.sh
@@ -9,13 +12,6 @@ You need wget and tensorflow to run these scripts
 To change the reduction, edit the num variable in `create_kepler_script.sh`.
 
 For some reason, this isn't linear (when num is 500, there's 301 targets, num=100 45 targets, num=150 77 targets)
-
-### Downloading Mikulski data
-```
-python process/generate_download_script.py --kepler_csv_file=dr24_tce.csv --download_dir=kepler/
-./get_kepler.sh
-```
-Creates the fits files in the kepler/ directory
 
 
 ## README for The Paper's Code (Used only as reference)
