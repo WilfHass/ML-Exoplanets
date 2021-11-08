@@ -3,13 +3,11 @@
 You need wget and tensorflow to run these scripts
 ### Changing size of dataset
 ```sh
-# Reduce the data set first
-python reduce_dataset.py --num [insert integer for dataset size]
-
 # Get the Kepler data
 ./create_kepler_script.sh
-
 ```
+To change the reduction, edit the num variable in `create_kepler_script.sh`.
+
 For some reason, this isn't linear (when num is 500, there's 301 targets, num=100 45 targets, num=150 77 targets)
 
 ### Downloading Mikulski data
