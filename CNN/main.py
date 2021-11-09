@@ -16,7 +16,7 @@ sys.path.append('helper_gen')
 
 # from nn_gen import Net
 import helper_gen as f
-from nn_gen import Net
+from nn_gen import Net_CNN_Local
 
 if __name__ == '__main__':
     args = f.make_parser()
@@ -28,16 +28,17 @@ if __name__ == '__main__':
     json_file.close()
 
     num_epochs = int(hp['optim']['num_epochs'])
-    per_layer = hp['model']['per_layer']
+    per_layer_conv = hp['model']['per_layer_conv']
+    per_layer_fc = hp['model']['per_layer_fc']
     learning_rate = float(hp['optim']['learning_rate'])
     wd = int(hp['optim']['wd'])
     momentum = float(hp['optim']['momentum'])
     nesterov = int(hp['optim']['nesterov'])
 
-    model = Net(per_layer).to("cpu")
+    model = Net_CNN_Local(per_layer_fc).to("cpu")
 
     num_inputs = 201
-    num_fake_curves = 1000
+    num_fake_curves = 10
 
     if args.param == 'param/param_global.json':
         num_inputs = 2001
@@ -59,13 +60,35 @@ if __name__ == '__main__':
     ######################### Data generation ####################
     ## Generate random local-looking data that looks like a y=x**2 curve (with some random fluctuations):
     # Note: This is untested, might have some mistakes here
-    fake_curve_array = []
-    for i in num_fake_curves:
-        light_curve_linspace = np.linspace(-1, 1, num=num_inputs)
+    fake_planets = []
+    fake_non_planets = []
+    light_curve_linspace = np.linspace(-1, 1, num=num_inputs)
+
+    for i in range(num_fake_curves):
         # PLEASE multiply light_curve_linspace values (x) by (x**2) * rand
         # where rand is a random number between 0.9 and 1.1 to get somewhat random looking data.
-        fake_curve_array.append(light_curve_linspace)
+        f_planet = lambda x: (x ** 2) * random.uniform(0.8, 1.2)
+        light_curve_planets = f_planet(light_curve_linspace)
 
+        f_non_planet = lambda x: abs(x) * random.uniform(0.8, 1.2)
+        light_curve_non_planets = f_non_planet(light_curve_linspace)
+
+        fake_planets.append(light_curve_planets)
+        fake_non_planets.append(light_curve_non_planets)
+
+    fake_planets = np.array(fake_planets)
+
+    print(fake_planets.shape)
+    print(fake_planets)
+
+    plt.plot(light_curve_linspace, fake_planets[0,:], label="Fake planet example", color="orange")
+
+    plt.legend()
+    plt.show()
+
+    '''
+    
+  
     # Convert fake light curve to a np array, then to a tensor
     fake_curve_np = np.array(fake_curve_array, dtype=np.float32)
     fake_curve_tensor = torch.from_numpy(fake_curve_np).float()
@@ -99,7 +122,7 @@ if __name__ == '__main__':
 
         # PLEASE Print out loss every few iterations
     # PLEASE add the final, trained, probability distribution and save as a csv file to outputs/prob_dist.csv
-
+  '''
 
 
 

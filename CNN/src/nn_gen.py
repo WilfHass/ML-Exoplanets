@@ -6,7 +6,7 @@ import torch.nn as nn
 ## depending on whether param_global or param_local was chosen.
 
 class Net_CNN_Local(nn.Module):
-    def __init__(self, per_layer):
+    def __init__(self, per_layer_fc):
         super(Net_CNN_Local, self).__init__()
 
         self.conv_in = nn.Conv1d(201, 16, 5)        # Da fuck????
@@ -17,11 +17,11 @@ class Net_CNN_Local(nn.Module):
         self.maxpool_1 = nn.MaxPool1d(7, stride=2)
         self.maxpool_out = nn.MaxPool1d(7, stride=2)
 
-        self.fc_in = nn.Linear(per_layer[0], per_layer[1], bias=True)
-        self.fc_1 = nn.Linear(per_layer[1], per_layer[2], bias=True)
-        self.fc_2 = nn.Linear(per_layer[2], per_layer[3], bias=True)
-        self.fc_3 = nn.Linear(per_layer[3], per_layer[4], bias=True)
-        self.fc_out = nn.Linear(per_layer[4], per_layer[5], bias=True)
+        self.fc_in = nn.Linear(per_layer_fc[0], per_layer_fc[1], bias=True)
+        self.fc_1 = nn.Linear(per_layer_fc[1], per_layer_fc[2], bias=True)
+        self.fc_2 = nn.Linear(per_layer_fc[2], per_layer_fc[3], bias=True)
+        self.fc_3 = nn.Linear(per_layer_fc[3], per_layer_fc[4], bias=True)
+        self.fc_out = nn.Linear(per_layer_fc[4], per_layer_fc[5], bias=True)
 
     def forward(self, h):
         c1 = torch.relu(self.conv_in(h))
