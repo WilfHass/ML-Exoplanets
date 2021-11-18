@@ -8,6 +8,7 @@
 
 	},
 	"model":{
+		"view" : "global",
 		"per_layer_fc": [512, 512, 512, 512, 512, 1],
 		"per_layer_conv": [2001, 50, 200, 150, 50, 1]
 
