@@ -5,11 +5,8 @@ import torch.nn as nn
 ## Make sure it outputs a binary value between 0 and 1, and takes in a variable number of inputs
 ## depending on whether param_global or param_local was chosen.
 
-## Aviv: Can't do this, because the local and global CNNs have different numbers of convolutional layers,
-## so two different networks will be needed
-
 class Net_CNN(nn.Module):
-    def __init__(self, view, per_layer_conv, per_layer_fc):
+    def __init__(self, view):
         super(Net_CNN, self).__init__()
 
         self.view = view
@@ -17,24 +14,28 @@ class Net_CNN(nn.Module):
         self.local_length = 201
         self.global_length = 2001
 
-        #self.conv_in = nn.Conv1d(201, 16, 5)        # Da fuck????
-        #self.conv_1 = nn.Conv1d(16, 16, 5)          # Da fuck????
-        #self.conv_2 = nn.Conv1d(32, 32, 5)          # Da fuck????
-        #self.conv_3 = nn.Conv1d(32, 32, 5)          # Da fuck????
+        ## Convolutional Columns
 
-        # Both local and global view use these layers
-        self.conv_in = nn.Conv1d(1, 16, 5)  # (in channels, out channels, kernel size)
-        self.conv_1 = nn.Conv1d(16, 16, 5)
-        self.conv_2 = nn.Conv1d(16, 32, 5)
-        self.conv_3 = nn.Conv1d(32, 32, 5)
+        # Only local view use these layers
+        self.conv_in_local = nn.Conv1d(1, 16, 5)  # (in channels, out channels, kernel size)
+        self.conv_1_local = nn.Conv1d(16, 16, 5)
+        self.conv_2_local = nn.Conv1d(16, 32, 5)
+        self.conv_3_local = nn.Conv1d(32, 32, 5)
 
         # Only global view uses these layers
-        self.conv_4 = nn.Conv1d(32, 64, 5)
-        self.conv_5 = nn.Conv1d(64, 64, 5)
-        self.conv_6 = nn.Conv1d(64, 128, 5)
-        self.conv_7 = nn.Conv1d(128, 128, 5)
-        self.conv_8 = nn.Conv1d(128, 256, 5)
-        self.conv_9 = nn.Conv1d(256, 256, 5)
+        self.conv_in_global = nn.Conv1d(1, 16, 5)
+        self.conv_1_global = nn.Conv1d(16, 16, 5)
+        self.conv_2_global = nn.Conv1d(16, 32, 5)
+        self.conv_3_global = nn.Conv1d(32, 32, 5)
+        self.conv_4_global = nn.Conv1d(32, 64, 5)
+        self.conv_5_global = nn.Conv1d(64, 64, 5)
+        self.conv_6_global = nn.Conv1d(64, 128, 5)
+        self.conv_7_global = nn.Conv1d(128, 128, 5)
+        self.conv_8_global = nn.Conv1d(128, 256, 5)
+        self.conv_9_global = nn.Conv1d(256, 256, 5)
+
+
+        ## Maxpool layers
 
         # Local view
         self.maxpool_local = nn.MaxPool1d(7, stride=2)
@@ -42,11 +43,8 @@ class Net_CNN(nn.Module):
         # Global view
         self.maxpool_global = nn.MaxPool1d(5, stride=2)
 
-        #self.fc_in = nn.Linear(per_layer_fc[0], per_layer_fc[1], bias=True)
-        #self.fc_1 = nn.Linear(per_layer_fc[1], per_layer_fc[2], bias=True)
-        #self.fc_2 = nn.Linear(per_layer_fc[2], per_layer_fc[3], bias=True)
-        #self.fc_3 = nn.Linear(per_layer_fc[3], per_layer_fc[4], bias=True)
-        #self.fc_out = nn.Linear(per_layer_fc[4], per_layer_fc[5], bias=True)
+
+        ## Fully connected layers
 
         # Local view
         self.fc_in_local = nn.Linear(32 * 5, 512, bias=True)  # output of conv1d is 32*5 ? --> only *5 once because 1d not 2d convolution?
@@ -55,7 +53,7 @@ class Net_CNN(nn.Module):
         self.fc_in_global = nn.Linear(256 * 5, 512, bias=True)  # output of conv1d is 256*5 ? --> only *5 once because 1d not 2d convolution?
 
         # Both global and local view
-        self.fc_in_both = nn.Linear(32*5 + 256*5, 512, bias=True)  # output of conv1d is 256*5 ? --> only *5 once because 1d not 2d convolution?
+        self.fc_in_both = nn.Linear(32*5 + 256*5, 512, bias=True)  # output of conv1d is 32*5 + 256*5 ? --> only *5 once because 1d not 2d convolution?
 
         ## Don't understand: First linear FC layer can't take in both local and global views the same way, since the outputs of the last convolutional
         ## layers in each "column" are of different sizes (32*5 for local, 256*5 for global)
@@ -95,51 +93,52 @@ class Net_CNN(nn.Module):
 
         return y
 
+    
     def forward_conv_local(self, input):
-        c1 = torch.relu(self.conv_in(input))
-        c2 = torch.relu(self.conv_1(c1))
+        c1 = torch.relu(self.conv_in_local(input))
+        c2 = torch.relu(self.conv_1_local(c1))
         m1 = self.maxpool_local(c2)             # Need relu? --> No
-        c3 = torch.relu(self.conv_2(m1))
-        c4 = torch.relu(self.conv_3(c3))
+        c3 = torch.relu(self.conv_2_local(m1))
+        c4 = torch.relu(self.conv_3_local(c3))
         m2 = self.maxpool_local(c4)           # Need relu? --> No
         
         return m2
 
     def forward_conv_global(self, input):
-        c1 = torch.relu(self.conv_in(input))
-        c2 = torch.relu(self.conv_1(c1))
+        c1 = torch.relu(self.conv_in_global(input))
+        c2 = torch.relu(self.conv_1_global(c1))
         m1 = self.maxpool_global(c2)             # Need relu? --> No
-        c3 = torch.relu(self.conv_2(m1))
-        c4 = torch.relu(self.conv_3(c3))
+        c3 = torch.relu(self.conv_2_global(m1))
+        c4 = torch.relu(self.conv_3_global(c3))
         m2 = self.maxpool_global(c4)           # Need relu? --> No
-        c5 = torch.relu(self.conv_4(m2))
-        c6 = torch.relu(self.conv_5(c5))
+        c5 = torch.relu(self.conv_4_global(m2))
+        c6 = torch.relu(self.conv_5_global(c5))
         m3 = self.maxpool_global(c6)
-        c7 = torch.relu(self.conv_6(m3))
-        c8 = torch.relu(self.conv_7(c7))
+        c7 = torch.relu(self.conv_6_global(m3))
+        c8 = torch.relu(self.conv_7_global(c7))
         m4 = self.maxpool_global(c8)
-        c9 = torch.relu(self.conv_8(m4))
-        c10 = torch.relu(self.conv_9(c9))
+        c9 = torch.relu(self.conv_8_global(m4))
+        c10 = torch.relu(self.conv_9_global(c9))
         m5 = self.maxpool_global(c10)        
         
         return m5
 
     def reset(self):
-        self.conv_in.reset_parameters()
-        self.conv_1.reset_parameters()
-        self.conv_2.reset_parameters()
-        self.conv_3.reset_parameters()
-        self.conv_4.reset_parameters()
-        self.conv_5.reset_parameters()
-        self.conv_6.reset_parameters()
-        self.conv_7.reset_parameters()
-        self.conv_8.reset_parameters()
-        self.conv_9.reset_parameters()
+        self.conv_in_local.reset_parameters()
+        self.conv_1_local.reset_parameters()
+        self.conv_2_local.reset_parameters()
+        self.conv_3_local.reset_parameters()
 
-        #self.maxpool_1.reset_parameters()          # Maxpool doesn't need reset since it doesn't have any learnable weights?
-        #self.maxpool_out.reset_parameters()
-        #self.maxpool_local.reset_parameters()
-        #self.maxpool_global.reset_parameters()
+        self.conv_in_global.reset_parameters()
+        self.conv_1_global.reset_parameters()
+        self.conv_2_global.reset_parameters()
+        self.conv_3_global.reset_parameters()
+        self.conv_4_global.reset_parameters()
+        self.conv_5_global.reset_parameters()
+        self.conv_6_global.reset_parameters()
+        self.conv_7_global.reset_parameters()
+        self.conv_8_global.reset_parameters()
+        self.conv_9_global.reset_parameters()
 
         self.fc_in_local.reset_parameters()
         self.fc_in_global.reset_parameters()
