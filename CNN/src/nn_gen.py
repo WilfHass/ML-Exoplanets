@@ -5,6 +5,7 @@ import torch.nn as nn
 ## Make sure it outputs a binary value between 0 and 1, and takes in a variable number of inputs
 ## depending on whether param_global or param_local was chosen.
 
+
 class Net_CNN(nn.Module):
     def __init__(self, view):
         super(Net_CNN, self).__init__()
@@ -13,6 +14,7 @@ class Net_CNN(nn.Module):
 
         self.local_length = 201
         self.global_length = 2001
+
 
         ## Convolutional Columns
 
@@ -36,7 +38,6 @@ class Net_CNN(nn.Module):
 
 
         ## Maxpool layers
-
         # Local view
         self.maxpool_local = nn.MaxPool1d(7, stride=2)
 
@@ -44,8 +45,8 @@ class Net_CNN(nn.Module):
         self.maxpool_global = nn.MaxPool1d(5, stride=2)
 
 
-        ## Fully connected layers
 
+        ## Fully connected layers
         # Local view
         self.fc_in_local = nn.Linear(32 * 5, 512, bias=True)  # output of conv1d is 32*5 ? --> only *5 once because 1d not 2d convolution?
 
@@ -53,6 +54,7 @@ class Net_CNN(nn.Module):
         self.fc_in_global = nn.Linear(256 * 5, 512, bias=True)  # output of conv1d is 256*5 ? --> only *5 once because 1d not 2d convolution?
 
         # Both global and local view
+
         self.fc_in_both = nn.Linear(32*5 + 256*5, 512, bias=True)  # output of conv1d is 32*5 + 256*5 ? --> only *5 once because 1d not 2d convolution?
 
         ## Don't understand: First linear FC layer can't take in both local and global views the same way, since the outputs of the last convolutional
@@ -63,7 +65,6 @@ class Net_CNN(nn.Module):
         self.fc_2 = nn.Linear(512, 512 , bias=True)
         self.fc_3 = nn.Linear(512, 512, bias=True)
         self.fc_out = nn.Linear(512, 1, bias=True)
-
 
     # Feed forward
     def forward(self, input_local, input_global):
@@ -85,13 +86,13 @@ class Net_CNN(nn.Module):
 
             h1 = torch.relu(self.fc_in_both(conv_output))
 
-
         h2 = torch.relu(self.fc_1(h1))
         h3 = torch.relu(self.fc_2(h2))
         h4 = torch.relu(self.fc_3(h3))
         y = torch.sigmoid(self.fc_out(h4))
 
         return y
+
 
     # Feed Forward for convolutional column for local view
     def forward_conv_local(self, input):
