@@ -53,7 +53,6 @@ def parse_function(example_proto):
 parsed_dataset = dataset.map(parse_function)
 print(len(list(parsed_dataset)))
 
-
 num_samples = len(list(parsed_dataset))
 
 array = []

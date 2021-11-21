@@ -150,3 +150,24 @@ class Net_CNN(nn.Module):
         self.fc_2.reset_parameters()
         self.fc_3.reset_parameters()
         self.fc_out.reset_parameters()
+
+
+
+class CustomLoss(nn.Module):
+
+    def __init__(self, data, loss_fn):
+        super(CustomLoss, self).__init__()
+        
+        # The dataset probs don't change so they can be determined once
+        self.data_probability(data)
+        self.loss_fn = loss_fn
+
+    def forward(self, model_prob, known_prob):
+        '''
+        loss function that determines the sum of differeneces from the model probability and the known probability
+        model_prob : nd-array containing probability that exoplanet is detected from the model
+        known_prob : nd-array containing 1s for autovetter known planet or 0 for not planet
+        '''
+
+        loss = sum(model_prob - known_prob)
+        return loss

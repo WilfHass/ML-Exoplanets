@@ -44,7 +44,7 @@ if __name__ == '__main__':
         num_inputs = 2001
 
 
-    loss = torch.nn.CrossEntropyLoss(reduction='mean')
+    loss_fn = torch.nn.CrossEntropyLoss(reduction='mean')
 
     ## List of optimizers
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, nesterov=nesterov)
@@ -101,19 +101,22 @@ if __name__ == '__main__':
     # For this you might want to keep 20% of the good data (x**2) unlabeled to be used
     # as testing data.
     # Call the training data tensor: training_tensor
-
+'''
     # Placeholder:
     training_tensor = 0
 
     listof_loss = []
     prob_list = []
-    for epoch in range(int(num_epochs)):
-        prob = model(training_tensor.reshape(-1,1).float())
+
+    for epoch in range(int(num_epochs)): # num epochs should already be an int
+
+        prob = model(training_tensor.reshape(-1,1).float()) 
 
         ## loss is the sum of differences between the data labels and the prediction of the model
-        ## PLEASE code that in.
+        ## PLEASE code that in. --> Made a loss module in nn_gen.py 
+        # Does Cross entropy loss do this???
 
-        loss_current = loss('predicted_labels_here', 'known_labels_here')
+        loss_current = loss_fn(prob, 'known_labels_here')
         listof_loss.append(loss_current.item())
 
         optimizer.zero_grad()
@@ -121,8 +124,10 @@ if __name__ == '__main__':
         optimizer.step()
 
         # PLEASE Print out loss every few iterations
+        if verbosity and (epoch%5 == 0) :
+            print('Epoch: {} \t Training Predictions: {}'.format(epoch, prob))
+            print("KL Loss: \t {}".format(loss_current))
     # PLEASE add the final, trained, probability distribution and save as a csv file to outputs/prob_dist.csv
-  '''
 
 
 
