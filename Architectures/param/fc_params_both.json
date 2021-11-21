@@ -1,0 +1,1 @@
+{"data": [{"train_batchsize": "64", "test_batchsize": "3148", "epoch": "50"}], "optim": [{"learning_rate": "1e-3", "training_iterations": "1000", "momentum": "0.99"}]}

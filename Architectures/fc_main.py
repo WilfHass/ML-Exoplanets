@@ -11,24 +11,23 @@ from sklearn.metrics import roc_auc_score
 sys.path.append('src') 
 from load_data import Data
 from parameter import Parameter
-from linear_net import LinNet
+from fc_net import FCNet
 pwd = os.getcwd()
 
 def performance(fin_model,test_set):
     inputs, labels = test_set[0][0],test_set[0][1]
     outputs = fin_model.forward(inputs)
-    print(outputs)
-    classification_threshold = 0.7
+    classification_threshold = 0.5
     for i in range(len(outputs)):
         if outputs[i]>=classification_threshold:
             outputs[i] = 1.0
         else:
             outputs[i] = 0.0 
-    
     accuracy = 0
     for i in range(len(outputs)):
         if outputs[i] == labels[i]:
             accuracy+=1
+
     accuracy = accuracy/len(outputs)
     print("Final Accuracy: ",accuracy)
     
@@ -56,10 +55,10 @@ def optimize(model,batchlist,params):
             print(e,loss.item())
         
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Linear Architecture')
+    parser = argparse.ArgumentParser(description='FC Architecture')
 
-    parser.add_argument('--view', type=str, default = 'both',help="Input 'local','global', or 'both'")
-    parser.add_argument('--param',type=str,default='param/linear_params_both.json',help='location of params file')
+    parser.add_argument('--view', type=str, default = 'local',help="Input 'local','global', or 'both'")
+    parser.add_argument('--param',type=str,default='param/fc_params_local.json',help='location of params file')
     parser.add_argument('--input',type=str,default='torch_data',help='location of folder for data')
     args = parser.parse_args()
 
@@ -75,9 +74,10 @@ if __name__ == '__main__':
     train_batchlists = list(train_loader)
     
     size = len(train_batchlists[0][0][0])
-    lin_net = LinNet(size)
-    optimize(lin_net,train_batchlists,params)
-    performance(lin_net,test_set)
+    fc_net = FCNet(size,view)
+    
+    optimize(fc_net,train_batchlists,params)
+    performance(fc_net,test_set)
     
     
     
