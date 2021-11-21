@@ -16,7 +16,7 @@ pwd = os.getcwd()
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Linear Architecture')
 
-    parser.add_argument('--view', type=str, help="Input 'local','global', or 'both'")
+    parser.add_argument('--view', type=str, default = 'local',help="Input 'local','global', or 'both'")
     parser.add_argument('--param',type=str,default='param/linear_params.json',help='location of params file')
     parser.add_argument('--input',type=str,default='torch_data',help='location of folder for data')
     args = parser.parse_args()
@@ -26,8 +26,17 @@ if __name__ == '__main__':
     input_folder = args.input
     view = args.view
     
-    data = Data(input_folder,params.trainbs,params.testbs)
-    train_data,test_data = data.loaders()
+    data = Data(input_folder,params.trainbs,params.testbs,view)
+    train_loader, test_loader = data.loaders()
     
-    lin_net = LinNet(view)
+    train_batchlists = list(train_loader)
+    
+    ## Example of how to use it with epochs
+    epoch_num = 2
+    for e in range(epoch_num):
+        inputs, labels = train_batchlists[e][0], train_batchlists[e][1]
+        print(inputs)
+        print(labels)
+        
+#     lin_net = LinNet(view)
     
