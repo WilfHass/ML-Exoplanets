@@ -36,6 +36,23 @@ def performance(fin_model,test_set):
     AUC = roc_auc_score(label_arr,output_arr)
     print(AUC)
     
+    ## Precision
+    count = 0
+    for i in range(len(outputs)):
+        if outputs[i]==1.0 and labels[i]==1.0:
+            count+=1
+        if labels[i]==1.0:
+            total+=1
+    precision = count/total 
+    
+    ## Recall 
+    count = 0
+    for i in range(len(outputs)):
+        if outputs[i]==1.0 and labels[i]==1.0:
+            count+=1
+        if outputs[i]==1.0:
+            total+=1
+    recall = count/total 
 
 def optimize(model,batchlist,params):
     epoch_num = params.epoch
