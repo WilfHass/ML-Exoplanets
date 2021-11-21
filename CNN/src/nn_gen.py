@@ -65,7 +65,7 @@ class Net_CNN(nn.Module):
         self.fc_out = nn.Linear(512, 1, bias=True)
 
 
-
+    # Feed forward
     def forward(self, input_local, input_global):
         if (self.view == "local"):
             conv_output = self.forward_conv_local(input_local)
@@ -93,7 +93,7 @@ class Net_CNN(nn.Module):
 
         return y
 
-    
+    # Feed Forward for convolutional column for local view
     def forward_conv_local(self, input):
         c1 = torch.relu(self.conv_in_local(input))
         c2 = torch.relu(self.conv_1_local(c1))
@@ -104,6 +104,7 @@ class Net_CNN(nn.Module):
         
         return m2
 
+    # Feed Forward for convolutional column for global view
     def forward_conv_global(self, input):
         c1 = torch.relu(self.conv_in_global(input))
         c2 = torch.relu(self.conv_1_global(c1))
@@ -123,6 +124,7 @@ class Net_CNN(nn.Module):
         
         return m5
 
+    # Reset parameters if using net more than once
     def reset(self):
         self.conv_in_local.reset_parameters()
         self.conv_1_local.reset_parameters()
