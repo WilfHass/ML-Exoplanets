@@ -8,6 +8,7 @@ class Parameter():
             p = data['data']
             self.trainbs =  int(p[0]['train_batchsize'])
             self.testbs = int(p[0]['test_batchsize'])
+            self.epoch = int(p[0]['epoch'])
 
             p = data['optim']
             self.lr = float(p[0]['learning_rate'])
