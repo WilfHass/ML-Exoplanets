@@ -13,6 +13,7 @@
 # limitations under the License.
 
 r"""Script to preprocesses data from the Kepler space telescope.
+
 This script produces training, validation and test sets of labeled Kepler
 Threshold Crossing Events (TCEs). A TCE is a detected periodic event on a
 particular Kepler target star that may or may not be a transiting planet. Each
@@ -20,9 +21,12 @@ TCE in the output contains local and global views of its light curve; auxiliary
 features such as period and duration; and a label indicating whether the TCE is
 consistent with being a transiting planet. The data sets produced by this script
 can be used to train and evaluate models that classify Kepler TCEs.
+
 The input TCEs and their associated labels are specified by the DR24 TCE Table,
 which can be downloaded in CSV format from the NASA Exoplanet Archive at:
+
   https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=q1_q17_dr24_tce
+
 The downloaded CSV file should contain at least the following column names:
   rowid: Integer ID of the row in the TCE table.
   kepid: Kepler ID of the target star.
@@ -35,23 +39,30 @@ The downloaded CSV file should contain at least the following column names:
   av_training_set: Autovetter training set label; one of PC (planet candidate),
       AFP (astrophysical false positive), NTP (non-transiting phenomenon),
       UNK (unknown).
+
 The Kepler light curves can be downloaded from the Mikulski Archive for Space
 Telescopes (MAST) at:
+
   http://archive.stsci.edu/pub/kepler/lightcurves.
+
 The Kepler data is assumed to reside in a directory with the same structure as
 the MAST archive. Specifically, the file names for a particular Kepler target
 star should have the following format:
+
     .../${kep_id:0:4}/${kep_id}/kplr${kep_id}-${quarter_prefix}_${type}.fits,
+
 where:
   kep_id is the Kepler id left-padded with zeros to length 9;
   quarter_prefix is the file name quarter prefix;
   type is one of "llc" (long cadence light curve) or "slc" (short cadence light
     curve).
+
 The output TFRecord file contains one serialized tensorflow.train.Example
 protocol buffer for each TCE in the input CSV file. Each Example contains the
 following light curve representations:
   global_view: Vector of length 2001; the Global View of the TCE.
   local_view: Vector of length 201; the Local View of the TCE.
+
 In addition, each Example contains the value of each column in the input TCE CSV
 file. Some of these features may be useful as auxiliary features to the model.
 The columns include:
@@ -121,8 +132,10 @@ _ALLOWED_LABELS = {"PC", "AFP", "NTP"}
 
 def _process_tce(tce):
   """Processes the light curve for a Kepler TCE and returns an Example proto.
+
   Args:
     tce: Row of the input TCE table.
+
   Returns:
     A tensorflow.train.Example proto containing TCE features.
   """
@@ -134,6 +147,7 @@ def _process_tce(tce):
 
 def _process_file_shard(tce_table, file_name):
   """Processes a single file shard.
+
   Args:
     tce_table: A Pandas DateFrame containing the TCEs in the shard.
     file_name: The output TFRecord file.
