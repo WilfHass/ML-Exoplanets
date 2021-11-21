@@ -9,16 +9,55 @@ import torch
 import torch.nn as nn
 from sklearn.metrics import roc_auc_score
 sys.path.append('src') 
+
 from load_data import Data
 from parameter import Parameter
 from linear_net import LinNet
 pwd = os.getcwd()
 
+def precision(outputs,labels):
+    count = 0
+    total = 0
+    for i in range(len(outputs)):
+        if outputs[i]==1.0 and labels[i]==1.0:
+            count+=1
+        if labels[i]==1.0:
+            total+=1
+    return(count/total)
+def recall(outputs, labels):
+    count = 0
+    total = 0
+    for i in range(len(outputs)):
+        if outputs[i]==1.0 and labels[i]==1.0:
+            count+=1
+        if outputs[i]==1.0:
+            total+=1
+    return (count/total)      
 def performance(fin_model,test_set):
     inputs, labels = test_set[0][0],test_set[0][1]
     outputs = fin_model.forward(inputs)
-    print(outputs)
-    classification_threshold = 0.7
+    
+    ct = np.arange(0.3,0.9,0.05)
+    pre_list = []
+    rec_list = []
+    
+    for c in ct:
+        new_out = np.zeros(len(outputs))
+        for i in range(len(outputs)):
+            if outputs[i]>=c:
+                new_out[i] = 1.0
+            else:
+                new_out[i] = 0.0 
+        prec = precision(new_out,labels) 
+        rec = recall(new_out,labels)
+        pre_list.append(prec)
+        rec_list.append(rec)
+    print(pre_list,rec_list)
+    plt.plot(rec_list,pre_list)
+    plt.show()
+    plt.savefig("pre-rec.png")                    
+                        
+    classification_threshold = 0.5
     for i in range(len(outputs)):
         if outputs[i]>=classification_threshold:
             outputs[i] = 1.0
@@ -38,23 +77,7 @@ def performance(fin_model,test_set):
     AUC = roc_auc_score(label_arr,output_arr)
     print(AUC)
     
-    ## Precision
-    count = 0
-    for i in range(len(outputs)):
-        if outputs[i]==1.0 and labels[i]==1.0:
-            count+=1
-        if labels[i]==1.0:
-            total+=1
-    precision = count/total 
-    
-    ## Recall 
-    count = 0
-    for i in range(len(outputs)):
-        if outputs[i]==1.0 and labels[i]==1.0:
-            count+=1
-        if outputs[i]==1.0:
-            total+=1
-    recall = count/total 
+
 
 def optimize(model,batchlist,params):
     epoch_num = params.epoch
@@ -76,8 +99,8 @@ def optimize(model,batchlist,params):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Linear Architecture')
 
-    parser.add_argument('--view', type=str, default = 'both',help="Input 'local','global', or 'both'")
-    parser.add_argument('--param',type=str,default='param/linear_params_both.json',help='location of params file')
+    parser.add_argument('--view', type=str, default = 'local',help="Input 'local','global', or 'both'")
+    parser.add_argument('--param',type=str,default='param/linear_params_local.json',help='location of params file')
     parser.add_argument('--input',type=str,default='torch_data',help='location of folder for data')
     args = parser.parse_args()
 
