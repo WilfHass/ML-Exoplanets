@@ -7,7 +7,7 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
-
+from sklearn.metrics import roc_auc_score
 sys.path.append('src') 
 from load_data import Data
 from parameter import Parameter
@@ -18,7 +18,7 @@ def performance(fin_model,test_set):
     inputs, labels = test_set[0][0],test_set[0][1]
     outputs = fin_model.forward(inputs)
     print(outputs)
-    classification_threshold = 0.5
+    classification_threshold = 0.7
     for i in range(len(outputs)):
         if outputs[i]>=classification_threshold:
             outputs[i] = 1.0
@@ -31,6 +31,11 @@ def performance(fin_model,test_set):
             accuracy+=1
     accuracy = accuracy/len(outputs)
     print("Final Accuracy: ",accuracy)
+    
+    label_arr = labels.detach().numpy()
+    output_arr = outputs.detach().numpy()
+    AUC = roc_auc_score(label_arr,output_arr)
+    print(AUC)
     
 
 def optimize(model,batchlist,params):
