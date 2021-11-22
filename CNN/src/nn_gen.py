@@ -6,9 +6,9 @@ import torch.nn as nn
 ## depending on whether param_global or param_local was chosen.
 
 
-class Net_CNN(nn.Module):
+class NetCNN(nn.Module):
     def __init__(self, view):
-        super(Net_CNN, self).__init__()
+        super(NetCNN, self).__init__()
 
         self.view = view
 
@@ -20,6 +20,7 @@ class Net_CNN(nn.Module):
 
         # Only local view use these layers
         self.conv_in_local = nn.Conv1d(1, 16, 5)  # (in channels, out channels, kernel size)
+        #self.conv_in_local = nn.Conv1d(201, 64, 5)
         self.conv_1_local = nn.Conv1d(16, 16, 5)
         self.conv_2_local = nn.Conv1d(16, 32, 5)
         self.conv_3_local = nn.Conv1d(32, 32, 5)
@@ -48,14 +49,16 @@ class Net_CNN(nn.Module):
 
         ## Fully connected layers
         # Local view
-        self.fc_in_local = nn.Linear(32 * 5, 512, bias=True)  # output of conv1d is 32*5 ? --> only *5 once because 1d not 2d convolution?
+        #self.fc_in_local = nn.Linear(32 * 5, 512, bias=True)  # output of conv1d is 32*5 ? --> only *5 once because 1d not 2d convolution?
+        self.fc_in_local = nn.Linear(1280, 512, bias=True)  # Where the heck does 1280 come from????
 
         # Global view
-        self.fc_in_global = nn.Linear(256 * 5, 512, bias=True)  # output of conv1d is 256*5 ? --> only *5 once because 1d not 2d convolution?
+        #self.fc_in_global = nn.Linear(256 * 5, 512, bias=True)  # output of conv1d is 256*5 ? --> only *5 once because 1d not 2d convolution?
+        self.fc_in_global = nn.Linear(13056, 512, bias=True)    # Where in the heck does 13056 come from!?!?!?!?!
 
         # Both global and local view
 
-        self.fc_in_both = nn.Linear(32*5 + 256*5, 512, bias=True)  # output of conv1d is 32*5 + 256*5 ? --> only *5 once because 1d not 2d convolution?
+        self.fc_in_both = nn.Linear(1280 + 13056, 512, bias=True)  # output of conv1d is 32*5 + 256*5 ? --> only *5 once because 1d not 2d convolution?
 
         ## Don't understand: First linear FC layer can't take in both local and global views the same way, since the outputs of the last convolutional
         ## layers in each "column" are of different sizes (32*5 for local, 256*5 for global)
@@ -66,19 +69,41 @@ class Net_CNN(nn.Module):
         self.fc_3 = nn.Linear(512, 512, bias=True)
         self.fc_out = nn.Linear(512, 1, bias=True)
 
+
     # Feed forward
-    def forward(self, input_local, input_global):
+    def forward(self, input):
+        #input = torch.unsqueeze(input, dim=1)
+        #print(input.shape)
+
         if (self.view == "local"):
-            conv_output = self.forward_conv_local(input_local)
+            input = torch.unsqueeze(input, dim=1)
+
+            conv_output = self.forward_conv_local(input)
+            #print(conv_output.shape)    #???
+            conv_output = torch.flatten(conv_output, 1)
+            #print(conv_output.shape)
             h1 = torch.relu(self.fc_in_local(conv_output))
+            #print(h1.shape)
 
         elif (self.view == "global"):
-            conv_output = self.forward_conv_global(input_global)
+            input = torch.unsqueeze(input, dim=1)
+
+            conv_output = self.forward_conv_global(input)
+            conv_output = torch.flatten(conv_output, 1)
             h1 = torch.relu(self.fc_in_global(conv_output))
 
         elif (self.view == "both"):
+            input_local = input[:,:201]
+            input_global = input[:,201:2202]
+
+            input_local = torch.unsqueeze(input_local, dim=1)
+            input_global = torch.unsqueeze(input_global, dim=1)
+
             local_conv_output = self.forward_conv_local(input_local)
             global_conv_output = self.forward_conv_global(input_global)
+
+            local_conv_output = torch.flatten(local_conv_output, 1)
+            global_conv_output = torch.flatten(global_conv_output, 1)
 
             # Concatenate tensors from outputs of two different convolutional columns?
             ## What is format of local and global view tensors???

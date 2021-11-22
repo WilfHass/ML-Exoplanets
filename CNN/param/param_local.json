@@ -1,16 +1,26 @@
 {
 	"optim":{
-		"learning_rate": 0.000001,
-    	"wd": 0.0,
+		"learning rate": 1e-5,
+		"beta 1": 0.9,
+		"beta 2": 0.999,
+		"epsilon": 1e-8,
+    	"weight decay": 0.0,
 		"momentum": 0.95,
-		"nesterov": 1,
-		"num_epochs": 500
-
+		"nesterov": 1
+	},
+	"training":{
+		"num epochs": 197,
+		"batch size": 64
+	},
+	"testing":{
+		"batch size": 3148
 	},
 	"model":{
-		"view" : "local",
-		"per_layer_fc": [160, 512, 512, 512, 512, 1],
-		"per_layer_conv": [1, 16, 16, 32, 32]
-
+		"view" : "local"
+	},
+	"output":{
+		"verbosity": 1,
+		"results path": "results",
+		"results name": "fig_test_both.pdf"
 	}
 }

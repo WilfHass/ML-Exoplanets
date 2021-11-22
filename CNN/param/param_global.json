@@ -1,6 +1,6 @@
 {
 	"optim":{
-		"learning_rate": 0.000001,
+		"learning_rate": 1e-6,
     	"wd": 0.0,
 		"momentum": 0.95,
 		"nesterov": 1,
