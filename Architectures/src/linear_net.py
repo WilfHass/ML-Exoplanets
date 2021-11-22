@@ -9,5 +9,5 @@ class LinNet(torch.nn.Module):
         b1 = torch.sigmoid(self.fc1(x))
         y = b1
 
-#         y = self.fc1(x)
+        # y = self.fc1(x)
         return y

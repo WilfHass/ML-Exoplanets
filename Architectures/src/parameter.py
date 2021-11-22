@@ -1,10 +1,12 @@
-import json,sys,os
+import json
 
 class Parameter():
     
-    def __init__(self,param_file,pwd):
-        with open(pwd+"/"+param_file) as json_file:
+    def __init__(self, param_file, pwd):
+
+        with open(pwd + "/" + param_file) as json_file:
             data = json.load(json_file)
+
             p = data['data']
             self.trainbs =  int(p[0]['train_batchsize'])
             self.testbs = int(p[0]['test_batchsize'])
