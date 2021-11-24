@@ -22,7 +22,7 @@ class NetCNN(nn.Module):
         self.conv_in_local = nn.Conv1d(1, 16, 5)  # (in channels, out channels, kernel size)
         #self.conv_in_local = nn.Conv1d(201, 64, 5)
         self.conv_1_local = nn.Conv1d(16, 16, 5)
-        self.conv_2_local = nn.Conv1d(16, 32, 5)
+        self.conv_2_local = nn.Conv1d(16, 32, 5)         # Need "circle" padding to loop between sides and keep size of light curves the same
         self.conv_3_local = nn.Conv1d(32, 32, 5)
 
         # Only global view uses these layers
@@ -175,24 +175,3 @@ class NetCNN(nn.Module):
         self.fc_2.reset_parameters()
         self.fc_3.reset_parameters()
         self.fc_out.reset_parameters()
-
-
-
-class CustomLoss(nn.Module):
-
-    def __init__(self, data, loss_fn):
-        super(CustomLoss, self).__init__()
-        
-        # The dataset probs don't change so they can be determined once
-        self.data_probability(data)
-        self.loss_fn = loss_fn
-
-    def forward(self, model_prob, known_prob):
-        '''
-        loss function that determines the sum of differeneces from the model probability and the known probability
-        model_prob : nd-array containing probability that exoplanet is detected from the model
-        known_prob : nd-array containing 1s for autovetter known planet or 0 for not planet
-        '''
-
-        loss = sum(model_prob - known_prob)
-        return loss
