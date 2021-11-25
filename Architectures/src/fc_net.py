@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 
 class FCNet(nn.Module):
-    def __init__(self, size, view):
+    def __init__(self, view):
         '''
         Fully Connected Neural Network
         size : size of data
@@ -30,6 +30,11 @@ class FCNet(nn.Module):
             self.c2 = nn.Linear(10,1)
 
         else:
+            if view == 'local':
+                size = 201
+            elif view == 'global':
+                size = 2001
+
             # FC layers -- HELPPPP: Shouldn't we use the same architecture for a local view as the architecture in the 'both' views 
             self.fc1= nn.Linear(size, 150)
             self.fc2= nn.Linear(150, 100) 
@@ -43,19 +48,18 @@ class FCNet(nn.Module):
         Feed forward propogation
         x : data input of batch size by 2201
         '''
+        # DOUBLE CHECK SLICING (upper limit is exclusive so only goes up to 200 and 2200)
+        local_data = x[:, :201]
+        global_data  = x[:, 201:-1]
+
         if self.view == "both":
-
-            # DOUBLE CHECK SLICING (upper limit is exclusive so only goes up to 200 and 2200)
-            x1 = x[:, :201]
-            x2  = x[:, 201:2201]
-
             # Local View 
-            d1 = torch.relu(self.a1(x1))
+            d1 = torch.relu(self.a1(local_data))
             d2 = torch.relu(self.a2(d1))
             d3 = torch.relu(self.a3(d2))
             
             # Global View
-            e1 = torch.relu(self.b1(x2))
+            e1 = torch.relu(self.b1(global_data))
             e2 = torch.relu(self.b2(e1))
             e3 = torch.relu(self.b3(e2))
             e4 = torch.relu(self.b4(e3))
@@ -67,7 +71,11 @@ class FCNet(nn.Module):
             y = torch.sigmoid(self.c2(g1))
 
         else:
-            b1 = torch.relu(self.fc1(x))
+            if self.view == 'local':
+                b1 = torch.relu(self.fc1(local_data))
+            elif self.view == 'global':
+                b1 = torch.relu(self.fc1(global_data))
+
             b2 = torch.relu(self.fc2(b1))
             b3 = torch.relu(self.fc3(b2))
             b4 = torch.relu(self.fc4(b3))
