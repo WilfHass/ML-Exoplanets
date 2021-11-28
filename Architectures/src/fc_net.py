@@ -18,7 +18,7 @@ class FCNet(nn.Module):
             self.a3 = nn.Linear(50,25)
 
             # Global view FC layers
-            self.b1 = nn.Linear(2000,1000)
+            self.b1 = nn.Linear(2001,1000)
             self.b2 = nn.Linear(1000,500)
             self.b3 = nn.Linear(500,250)
             self.b4 = nn.Linear(250,100)
@@ -26,7 +26,7 @@ class FCNet(nn.Module):
             self.b6 = nn.Linear(50,25)
 
             # Combined layers
-            self.c1 = nn.Linear(25,10)
+            self.c1 = nn.Linear(50,10)
             self.c2 = nn.Linear(10,1)
 
         else:
@@ -67,7 +67,8 @@ class FCNet(nn.Module):
             e6 = torch.relu(self.b6(e5))
             
             # Combine Views
-            g1 = torch.relu(self.c1(d3+e6))
+            combine = torch.cat((d3,e6),1)
+            g1 = torch.relu(self.c1(combine))
             y = torch.sigmoid(self.c2(g1))
 
         else:
