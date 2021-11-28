@@ -50,7 +50,7 @@ class FCNet(nn.Module):
         '''
         # DOUBLE CHECK SLICING (upper limit is exclusive so only goes up to 200 and 2200)
         local_data = x[:, :201]
-        global_data  = x[:, 201:-1]
+        global_data  = x[:, 201:]
 
         if self.view == "both":
             # Local View 
