@@ -1,18 +1,25 @@
 import sys, os
 import sys
 import torch
-
+import argparse
 sys.path.append('src') 
 from load_data import *
 from parameter import Parameter
 from fc_net import FCNet
 from helper_gen import make_parser, performance, optimize
+from heatmap import *
 
 pwd = os.getcwd()
         
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='FC Main')
+    parser.add_argument('--input', default ='src/torch_data',type=str, help="location for input file")
+    parser.add_argument('--view', default='local',type=str,help="view")
+    parser.add_argument('--param', default='param/fc_local.json',type=str,help="location of parameter file")
+    parser.add_argument('--result', default='result/',type=str,help="location of parameter file")
 
-    args = make_parser()
+   
+    args = parser.parse_args()
 
     param_file = args.param
 
@@ -50,4 +57,5 @@ if __name__ == '__main__':
     
     #optimize(fc_net, train_batchlists, params)
     test_set = list(test_loader)
+    create_heatmap(fc_net, input_folder,view)
     perf_list = performance(fc_net, test_set)

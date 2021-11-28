@@ -2,24 +2,32 @@ import sys, os
 import numpy as np
 import sys
 import torch
-
+import argparse
 sys.path.append('src') 
 from load_data import *
 from parameter import Parameter
 from linear_net import LinNet
 from helper_gen import make_parser, performance, optimize
+from heatmap import *
 
 pwd = os.getcwd()
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Linear Main')
+    parser.add_argument('--input', default ='src/torch_data',type=str, help="location for input file")
+    parser.add_argument('--view', default='global',type=str,help="view")
+    parser.add_argument('--param', default='param/linear_global.json',type=str,help="location of parameter file")
+    parser.add_argument('--result', default='result/',type=str,help="location of parameter file")
 
-    args = make_parser()
+   
+    args = parser.parse_args()
 
     param_file = args.param
 
     params = Parameter(param_file, pwd)
     input_folder = args.input
+    print(input_folder)
     view = args.view
     result_file = args.result
     epoch_num = params.epoch
@@ -52,4 +60,5 @@ if __name__ == '__main__':
     
     #optimize(fc_net, train_batchlists, params)
     test_set = list(test_loader)
+    create_heatmap(lin_net,input_folder)
     perf_list = performance(lin_net, test_set)
