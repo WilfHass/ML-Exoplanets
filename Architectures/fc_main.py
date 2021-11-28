@@ -22,7 +22,7 @@ if __name__ == '__main__':
     result_file = args.result
     epoch_num = params.epoch
 
-    train_loader, test_loader = dataPrep(input_folder, params.trainbs)
+    train_loader, test_loader = dataPrep(input_folder, params.trainbs,params.testbs)
     fc_net = FCNet(view)
     optim = torch.optim.Adam(fc_net.parameters(), lr=params.lr, betas=(0.9, 0.99), amsgrad=False)
 
@@ -49,5 +49,5 @@ if __name__ == '__main__':
 
     
     #optimize(fc_net, train_batchlists, params)
-
-    # perf_list = performance(fc_net, test_set)
+    test_set = list(test_loader)
+    perf_list = performance(fc_net, test_set)

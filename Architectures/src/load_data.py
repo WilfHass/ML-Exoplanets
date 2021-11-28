@@ -43,7 +43,7 @@ class Data(Dataset):
         return data, label
 
 
-def dataPrep(input_folder, batch_size):
+def dataPrep(input_folder, batch_size,test_batch_size):
     '''Prepare the data by placing it into Datasets and then into the DataLoader from PyTorch'''
     # get the train and test data
     train_data, test_data = getData(input_folder)
@@ -54,7 +54,7 @@ def dataPrep(input_folder, batch_size):
 
     # Load the data into the pyTorch DataLoader
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)   # shuffle the training data
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)    # don't shuffle the testing data
+    test_loader = DataLoader(test_dataset, batch_size=test_batch_size, shuffle=False)    # don't shuffle the testing data
 
     return train_loader, test_loader
 

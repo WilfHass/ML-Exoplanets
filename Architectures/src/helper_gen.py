@@ -23,14 +23,21 @@ def make_parser():
     return args
 
 
-def precision(outputs,labels):
+def precision(outputs,labels): 
     '''
     Computes the precision for a given output and label set
     '''
-    count = sum(np.equal(outputs, labels))
+    count = 0
+    for i in range(len(outputs)):
+        if outputs[i]==1.0 and labels[i]==1.0:
+            count+=1
+#     count = sum(np.equal(outputs, labels))
     total = sum(labels)
-
-    return (count/total)
+    if total == 0:
+        prec = 0
+    else:
+        prec = count/total
+    return (prec)
 
 
 def recall(outputs, labels):
@@ -39,10 +46,17 @@ def recall(outputs, labels):
     outputs : classified TCEs e.g. 1 or 0
     labels : Actual values for TCEs e.g. 1 or 0
     '''
-    count = sum(np.equal(outputs, labels))
-    total = sum(outputs)
+    count = 0
+    for i in range(len(outputs)):
+        if outputs[i]==1.0 and labels[i]==1.0:
+            count+=1
 
-    return (count/total)
+    total = sum(outputs)
+    if total == 0:
+        rec = 0
+    else:
+        rec = count/total
+    return (rec)
 
 
 def accuracy(outputs, labels):
@@ -73,7 +87,7 @@ def compare_thresholds(outputs, labels):
     labels : test set actual values
     '''
     # List of classification thresholds to run through
-    ct = np.arange(0.3, 0.9, 0.05)
+    ct = np.arange(0.3, 0.8, 0.01)
 
     # Precision and recall lists
     pre_list = []
@@ -84,11 +98,11 @@ def compare_thresholds(outputs, labels):
 
         prec = precision(new_out, labels) 
         rec = recall(new_out, labels)
+        if rec!=0 and prec!=0:
+            pre_list.append(prec)
+            rec_list.append(rec)
 
-        pre_list.append(prec)
-        rec_list.append(rec)
-
-    print(pre_list, rec_list)
+#     print(pre_list, rec_list)
 
     plt.plot(rec_list, pre_list)
     plt.ylabel("Precision")
@@ -103,6 +117,7 @@ def performance(fin_model, test_set):
     fin_model : Last model of the FCNN
     test_set : set of data to test the finished model
     '''
+    
 
     inputs, labels = test_set[0][0], test_set[0][1]
     outputs = fin_model.forward(inputs)
@@ -114,7 +129,7 @@ def performance(fin_model, test_set):
 
     # Classify the outputs
     classified_outputs = is_TCE(outputs, classification_threshold)
-    compare_thresholds(outputs, labels)
+    
     
     # Accuracy
     acc = accuracy(classified_outputs, labels)
@@ -131,6 +146,8 @@ def performance(fin_model, test_set):
     # Recall 
     rec = recall(classified_outputs, labels)
     print("Final Recall: ", rec)
+    
+    compare_thresholds(outputs, labels)
 
     return [acc, prec, rec, AUC]
 
