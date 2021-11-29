@@ -8,6 +8,8 @@ from cnn_net import CNNNet
 from helper_gen import make_parser, performance, optimize
 from heatmap import *
 
+from torch.utils.tensorboard import SummaryWriter
+
 pwd = os.getcwd()
         
 if __name__ == '__main__':
@@ -30,11 +32,31 @@ if __name__ == '__main__':
 
     train_loader, test_loader = dataPrep(input_folder, params.trainbs, params.testbs)
     cnn_net = CNNNet(view)
-    optim = torch.optim.Adam(cnn_net.parameters(), lr=params.lr, betas=(0.9, 0.999), amsgrad=False)
+    beta_l = 0.9
+    beta_h = 0.999
+    amsgrad = 0
+    optim = torch.optim.Adam(cnn_net.parameters(), lr=params.lr, betas=(beta_l, beta_h), amsgrad=amsgrad)
+    #optim = torch.optim.Adam(cnn_net.parameters(), lr=params.lr, betas=(0.9, 0.999), amsgrad=False)
 
     # optim = torch.optim.SGD(model.parameters(),lr=params.lr, momentum=params.mom)
 
+    test_set = list(test_loader)
+
     loss_fn = torch.nn.BCELoss()
+
+    res_path = "./runs/"
+    run_ID = 'cnn_local_test'  # Update the run_ID to see comparison of different runs
+    tb_ID = res_path + run_ID
+    for i in range(1, 500):
+        cur_name = (res_path + run_ID + '_{}'.format(str(i)))
+        if not os.path.isdir(cur_name):
+            tb_ID = cur_name
+            break
+
+    print(tb_ID)
+
+    
+    writer = SummaryWriter(tb_ID)
 
     for e in range(epoch_num):
         
@@ -48,136 +70,53 @@ if __name__ == '__main__':
             loss = loss_fn(outputs, label)
             loss.backward()
             optim.step()
+            loss_f = float(loss.item())
             
 
         if e % 1 == 0:
             print("Epoch [{}/{}] \t Loss: {}".format(e+1, epoch_num, loss.item()))
 
+        perf_list = performance(cnn_net, test_set)
+
+        writer.add_scalar('Training loss', loss_f, float(e))
+        writer.add_scalar('Training accuracy', float(perf_list[0]), float(e))
+        writer.add_scalar('Training precision', float(perf_list[1]), float(e))
+        writer.add_scalar('Training recall', float(perf_list[2]), float(e))
+        writer.add_scalar('Training AUC', float(perf_list[3]), float(e))
+
+    tf_params = {
+        "epochs": float(params.epoch),
+        "lr": float(params.lr),
+        "momentum": float(params.mom),
+        "training bs": float(params.trainbs),
+        "beta lower": beta_l,
+        "beta upper": beta_h,
+        "amsgrad": amsgrad
+    }
+
+    tf_metric = {
+        "Training loss": loss_f,
+        "Training accuracy": float(perf_list[0]),
+        "Training precision": float(perf_list[1]),
+        "Training recall": float(perf_list[2]),
+        "Training AUC": float(perf_list[3])
+    }
+    print(tf_params)
+
+    writer.add_hparams(tf_params, tf_metric)
+
+    writer.close()
+    print("Finished")
+    # To open tensorboard, run in terminal:
+    # tensorboard --logdir=runs
+    #optimize(fc_net, train_batchlists, params)
+
+    # perf_list = performance(fc_net, test_set)
+    # [acc, prec, rec, AUC]
+    print(perf_list)
+
     
     #optimize(cnn_net, train_batchlists, params)
-    test_set = list(test_loader)
-    create_heatmap(cnn_net, input_folder,view)
-    perf_list = performance(cnn_net, test_set)
-
-
-
-
-
-
-
-'''
-import sys, os
-import numpy as np
-import json, argparse, sys
-import torch.optim as optim
-import matplotlib.pyplot as plt
-import torch
-import torch.nn as nn
-
-sys.path.append('src') 
-from load_data import Data
-#from parameter import Parameter
-# from linear_net import LinNet
-from nn_gen import CNNNet
-
-pwd = os.getcwd()
-
-
-def plot_results(loss_arr, res_path, res_name):
-    num_epochs= len(loss_arr)
-
-    # Plot saved in results directory
-    plt.plot(range(1, num_epochs+1), loss_arr)
-    plt.xlabel("Epoch")
-    plt.ylabel("Binary Cross Entropy Loss")
-    plt.grid()
-    plt.savefig(os.path.join(res_path, res_name))
-    plt.close()
-
-
-def prep(input_folder, params, view):
-    # Construct a model
-    cnn_net = CNNNet(view).to(torch.device("cpu"))
-
-    # Construct data
-    data = Data(input_folder, params['training']['batch size'], params['training']['batch size'], view)
-    train_loader, test_loader = data.loaders()
-    
-    train_batchlists = list(train_loader)
-    test_batchlists = list(test_loader)
-
-    return cnn_net, train_batchlists, test_batchlists
-
-
-def run(cnn, train_batchlists, test_batchlists, params):
-    # Define an optimizer and the loss function
-    optimizer = optim.Adam(cnn.parameters(), lr=params['optim']['learning rate'], betas=(params['optim']['beta 1'], params['optim']['beta 2']), eps=params['optim']['epsilon'], weight_decay=params['optim']['weight decay'])
-    #optimizer = optim.Adam(cnn.parameters(), lr=1e-6)
-    loss_fn = nn.BCELoss()
-
-    num_epochs= int(params['training']['num epochs'])
-    #num_epochs= 5
-
-    train_loss_arr, test_loss_arr = [], []
-
-    cnn.train()
-
-    for epoch in range(num_epochs):
-
-        inputs, labels = train_batchlists[epoch][0], train_batchlists[epoch][1]
-
-        labels = torch.unsqueeze(labels, dim=1)
-
-        outputs = cnn(inputs)
-        loss = loss_fn(outputs, labels)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        train_loss_arr.append(loss)
-        
-        if params['output']['verbosity']:
-            print('Epoch [{}/{}]:'.format(epoch+1, num_epochs))
-            print('Training Loss: {:.4f}'.format(loss.item()))
-            print()
-
-    return cnn, train_loss_arr, test_loss_arr
-
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='CNN Architecture')
-
-    parser.add_argument('--view', type=str, default = 'local',help="Input 'local','global', or 'both'")
-    parser.add_argument('--param',type=str,default='param_local.json',help='location of params file')
-    parser.add_argument('--input',type=str,default='torch_data',help='location of folder for data')
-    args = parser.parse_args()
-
-    param_file = args.param
-    with open(os.path.join('param', param_file)) as paramfile:
-        params = json.load(paramfile)
-    #params = Parameter(param_file,pwd)
-    input_folder = args.input
-    view = args.view
-
-    # Prepare CNN model and training/testing data
-    cnn, train_batchlists, test_batchlists = prep(input_folder, params, view)
-
-    # Train model and obtain train/test loss values
-    trained_cnn, train_loss_arr, test_loss_arr = run(cnn, train_batchlists, test_batchlists, params)
-
-    # Plot train/test loss values
-    plot_results(train_loss_arr, params['output']['results path'], params['output']['results name'])
-    #plot_results(train_loss_arr, 'results', 'fig_test_1.pdf')
-    
-    
-    ## Example of how to use it with epochs
-    #epoch_num = 2
-    #for e in range(epoch_num):
-    #    inputs, labels = train_batchlists[e][0], train_batchlists[e][1]
-    #    print(inputs)
-    #    print(labels)
-        
-#     lin_net = LinNet(view)
-'''
+    #test_set = list(test_loader)
+    #create_heatmap(cnn_net, input_folder,view)
+    #perf_list = performance(cnn_net, test_set)
