@@ -15,9 +15,6 @@
 	"testing":{
 		"batch size": 3148
 	},
-	"model":{
-		"view" : "local"
-	},
 	"output":{
 		"verbosity": 1,
 		"results path": "results",

@@ -1,72 +1,4 @@
 import sys, os
-import torch
-import argparse
-sys.path.append('src') 
-from load_data import *
-from parameter import Parameter
-from cnn_net import CNNNet
-from helper_gen import make_parser, performance, optimize
-from heatmap import *
-
-pwd = os.getcwd()
-        
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='CNN Main')
-    parser.add_argument('--input', default ='src/torch_data',type=str, help="location for input file")
-    parser.add_argument('--view', default='local',type=str,help="view")
-    parser.add_argument('--param', default='param/cnn_local.json',type=str,help="location of parameter file")
-    parser.add_argument('--result', default='result/',type=str,help="location of parameter file")
-
-   
-    args = parser.parse_args()
-
-    param_file = args.param
-
-    params = Parameter(param_file, pwd)
-    input_folder = args.input
-    view = args.view
-    result_file = args.result
-    epoch_num = params.epoch
-
-    train_loader, test_loader = dataPrep(input_folder, params.trainbs, params.testbs)
-    cnn_net = CNNNet(view)
-    optim = torch.optim.Adam(cnn_net.parameters(), lr=params.lr, betas=(0.9, 0.999), amsgrad=False)
-
-    # optim = torch.optim.SGD(model.parameters(),lr=params.lr, momentum=params.mom)
-
-    loss_fn = torch.nn.BCELoss()
-
-    for e in range(epoch_num):
-        
-        # Train the model
-        cnn_net.train()
-        for batch_idx, (data, label) in enumerate(train_loader):
-
-            optim.zero_grad()
-            outputs = cnn_net(data)
-            label = torch.reshape(label,(len(label),-1))
-            loss = loss_fn(outputs, label)
-            loss.backward()
-            optim.step()
-            
-
-        if e % 1 == 0:
-            print("Epoch [{}/{}] \t Loss: {}".format(e+1, epoch_num, loss.item()))
-
-    
-    #optimize(cnn_net, train_batchlists, params)
-    test_set = list(test_loader)
-    create_heatmap(cnn_net, input_folder,view)
-    perf_list = performance(cnn_net, test_set)
-
-
-
-
-
-
-
-'''
-import sys, os
 import numpy as np
 import json, argparse, sys
 import torch.optim as optim
@@ -180,4 +112,4 @@ if __name__ == '__main__':
     #    print(labels)
         
 #     lin_net = LinNet(view)
-'''
+    

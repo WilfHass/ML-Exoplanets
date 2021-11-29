@@ -1,14 +1,15 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
-## PLEASE replace this linear network with a convolutional NN according to the paper's architecture
-## Make sure it outputs a binary value between 0 and 1, and takes in a variable number of inputs
-## depending on whether param_global or param_local was chosen.
-
-
-class NetCNN(nn.Module):
+class CNNNet(nn.Module):
     def __init__(self, view):
-        super(NetCNN, self).__init__()
+        '''
+        Convolutional Neural Network
+        size : size of data
+        view : view of TCE data -> 'global' | 'local' | 'both'
+        '''
+        super(CNNNet, self).__init__()
 
         self.view = view
 
@@ -71,36 +72,44 @@ class NetCNN(nn.Module):
 
 
     # Feed forward
-    def forward(self, input):
-        #input = torch.unsqueeze(input, dim=1)
-        #print(input.shape)
+    def forward(self, x):
+        '''
+        Feed forward propogation
+        x : data input of batch size by 2201
+        '''
+        # DOUBLE CHECK SLICING (upper limit is exclusive so only goes up to 200 and 2200)
+        x_local = x[:, :201]
+        x_global = x[:, 201:]
+        #x_local = x[:,:201]
+        #x_global = x[:,201:2202]
+
+        x_local = torch.unsqueeze(x_local, dim=1)
+        x_global = torch.unsqueeze(x_global, dim=1)
+
+        #x = torch.unsqueeze(x, dim=1)
+        #print(x.shape)
 
         if (self.view == "local"):
-            input = torch.unsqueeze(input, dim=1)
+            #x = torch.unsqueeze(local_data, dim=1)
+            #x = x.view(-1, 1, self.local_length)
 
-            conv_output = self.forward_conv_local(input)
-            #print(conv_output.shape)    #???
+            conv_output = self.forward_conv_local(x_local)
+            #print(len(conv_output))    #???
             conv_output = torch.flatten(conv_output, 1)
             #print(conv_output.shape)
-            h1 = torch.relu(self.fc_in_local(conv_output))
+            h1 = F.relu(self.fc_in_local(conv_output))
             #print(h1.shape)
 
         elif (self.view == "global"):
-            input = torch.unsqueeze(input, dim=1)
+            #x = torch.unsqueeze(global_data, dim=1)
 
-            conv_output = self.forward_conv_global(input)
+            conv_output = self.forward_conv_global(x_global)
             conv_output = torch.flatten(conv_output, 1)
-            h1 = torch.relu(self.fc_in_global(conv_output))
+            h1 = F.relu(self.fc_in_global(conv_output))
 
         elif (self.view == "both"):
-            input_local = input[:,:201]
-            input_global = input[:,201:2202]
-
-            input_local = torch.unsqueeze(input_local, dim=1)
-            input_global = torch.unsqueeze(input_global, dim=1)
-
-            local_conv_output = self.forward_conv_local(input_local)
-            global_conv_output = self.forward_conv_global(input_global)
+            local_conv_output = self.forward_conv_local(x_local)
+            global_conv_output = self.forward_conv_global(x_global)
 
             local_conv_output = torch.flatten(local_conv_output, 1)
             global_conv_output = torch.flatten(global_conv_output, 1)
@@ -109,46 +118,46 @@ class NetCNN(nn.Module):
             ## What is format of local and global view tensors???
             conv_output = torch.cat((local_conv_output, global_conv_output), dim=1)
 
-            h1 = torch.relu(self.fc_in_both(conv_output))
+            h1 = F.relu(self.fc_in_both(conv_output))
 
-        h2 = torch.relu(self.fc_1(h1))
-        h3 = torch.relu(self.fc_2(h2))
-        h4 = torch.relu(self.fc_3(h3))
+        h2 = F.relu(self.fc_1(h1))
+        h3 = F.relu(self.fc_2(h2))
+        h4 = F.relu(self.fc_3(h3))
         y = torch.sigmoid(self.fc_out(h4))
 
         return y
 
 
     # Feed Forward for convolutional column for local view
-    def forward_conv_local(self, input):
-        c1 = torch.relu(self.conv_in_local(input))
-        c2 = torch.relu(self.conv_1_local(c1))
-        m1 = self.maxpool_local(c2)             # Need relu? --> No
-        c3 = torch.relu(self.conv_2_local(m1))
-        c4 = torch.relu(self.conv_3_local(c3))
-        m2 = self.maxpool_local(c4)           # Need relu? --> No
+    def forward_conv_local(self, x):
+        x = F.relu(self.conv_in_local(x))
+        x = F.relu(self.conv_1_local(x))
+        x = self.maxpool_local(x)             # Need relu? --> No
+        x = F.relu(self.conv_2_local(x))
+        x = F.relu(self.conv_3_local(x))
+        x = self.maxpool_local(x)           # Need relu? --> No
         
-        return m2
+        return x
 
     # Feed Forward for convolutional column for global view
-    def forward_conv_global(self, input):
-        c1 = torch.relu(self.conv_in_global(input))
-        c2 = torch.relu(self.conv_1_global(c1))
-        m1 = self.maxpool_global(c2)             # Need relu? --> No
-        c3 = torch.relu(self.conv_2_global(m1))
-        c4 = torch.relu(self.conv_3_global(c3))
-        m2 = self.maxpool_global(c4)           # Need relu? --> No
-        c5 = torch.relu(self.conv_4_global(m2))
-        c6 = torch.relu(self.conv_5_global(c5))
-        m3 = self.maxpool_global(c6)
-        c7 = torch.relu(self.conv_6_global(m3))
-        c8 = torch.relu(self.conv_7_global(c7))
-        m4 = self.maxpool_global(c8)
-        c9 = torch.relu(self.conv_8_global(m4))
-        c10 = torch.relu(self.conv_9_global(c9))
-        m5 = self.maxpool_global(c10)        
+    def forward_conv_global(self, x):
+        x = F.relu(self.conv_in_global(x))
+        x = F.relu(self.conv_1_global(x))
+        x = self.maxpool_global(x)             # Need relu? --> No
+        x = F.relu(self.conv_2_global(x))
+        x = F.relu(self.conv_3_global(x))
+        x = self.maxpool_global(x)           # Need relu? --> No
+        x = F.relu(self.conv_4_global(x))
+        x = F.relu(self.conv_5_global(x))
+        x = self.maxpool_global(x)
+        x = F.relu(self.conv_6_global(x))
+        x = F.relu(self.conv_7_global(x))
+        x = self.maxpool_global(x)
+        x = F.relu(self.conv_8_global(x))
+        x = F.relu(self.conv_9_global(x))
+        x = self.maxpool_global(x)        
         
-        return m5
+        return x
 
     # Reset parameters if using net more than once
     def reset(self):
