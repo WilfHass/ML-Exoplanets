@@ -45,7 +45,7 @@ if __name__ == '__main__':
     loss_fn = torch.nn.BCELoss()
 
     res_path = "./runs/"
-    run_ID = 'cnn_local_test'  # Update the run_ID to see comparison of different runs
+    run_ID = 'cnn_local_test_2'  # Update the run_ID to see comparison of different runs
     tb_ID = res_path + run_ID
     for i in range(1, 500):
         cur_name = (res_path + run_ID + '_{}'.format(str(i)))
