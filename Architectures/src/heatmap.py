@@ -22,16 +22,16 @@ def get_data(input_folder):
     
 
 def create_heatmap(model,input_folder,view):
-    planet_tce_global = get_data(input_folder)
+    planet_tce = get_data(input_folder)
     
     # Randomly chose one of the spectra for the heat map (choosing a view)
     index = 2
     if view=='local':
-        chosen_spectrum = planet_tce_global[index][:201]
+        chosen_spectrum = planet_tce[index][:201]
     elif view=='global':
-        chosen_spectrum = planet_tce_global[index][201:]
+        chosen_spectrum = planet_tce[index][201:]
     else:
-        chosen_spectrum = planet_tce_global[index]
+        chosen_spectrum = planet_tce[index]
 
     #Creating a window that will move along the points and turn those points to zero
     window = np.arange(-49,1,1)
@@ -43,11 +43,11 @@ def create_heatmap(model,input_folder,view):
     #The window will move as long as the first element of window is less than the last element of the spectrum
     while window[0]<=len(chosen_spectrum):
         #The new spectrum that will have certain values become zero
-        new_spectrum = torch.tensor([i for i in planet_tce_global[index]])
+        new_spectrum = torch.tensor([i for i in planet_tce[index]])
         
         # The positions that are seen in window will become zero 
         for i in window:
-            if i>=0:
+            if i>=0 and i<len(chosen_spectrum):
                 new_spectrum[int(i)] = 0.0
                 
         #Probability of the new spectrum being a planet
@@ -59,7 +59,7 @@ def create_heatmap(model,input_folder,view):
         
         #Move the window
         window = window+ones
-    
+
     heats = []
     for i in range(len(chosen_spectrum)):
         indices = []

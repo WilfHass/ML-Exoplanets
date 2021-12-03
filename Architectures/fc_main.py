@@ -2,6 +2,7 @@ import sys, os
 import sys
 import torch
 import argparse
+import numpy as np
 sys.path.append('src') 
 from load_data import *
 from parameter import Parameter
@@ -30,6 +31,7 @@ if __name__ == '__main__':
     epoch_num = params.epoch
 
     train_loader, test_loader = dataPrep(input_folder, params.trainbs,params.testbs)
+    test_set = list(test_loader)
     fc_net = FCNet(view)
     optim = torch.optim.Adam(fc_net.parameters(), lr=params.lr, betas=(0.9, 0.99), amsgrad=False)
 
@@ -41,6 +43,7 @@ if __name__ == '__main__':
         
         # Train the model
         fc_net.train()
+        loss_avg = [] 
         for batch_idx, (data, label) in enumerate(train_loader):
 
             optim.zero_grad()
@@ -49,13 +52,15 @@ if __name__ == '__main__':
             loss = loss_fn(outputs, label)
             loss.backward()
             optim.step()
+            loss_avg.append(loss.item())
             
 
         if e % 10 == 0:
-            print("Epoch [{}/{}] \t Loss: {}".format(e, epoch_num, loss.item()))
+            print("Epoch [{}/{}] \t Loss: {}".format(e, epoch_num, np.mean(loss_avg)))
+            performance(fc_net, test_set)
 
     
     #optimize(fc_net, train_batchlists, params)
-    test_set = list(test_loader)
+
     create_heatmap(fc_net, input_folder,view)
     perf_list = performance(fc_net, test_set)

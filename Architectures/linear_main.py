@@ -2,6 +2,7 @@ import sys, os
 import numpy as np
 import sys
 import torch
+import numpy as np
 import argparse
 sys.path.append('src') 
 from load_data import *
@@ -36,12 +37,12 @@ if __name__ == '__main__':
     lin_net = LinNet(view)
     optim = torch.optim.Adam(lin_net.parameters(), lr=params.lr, betas=(0.9, 0.99), amsgrad=False)
 
-    # optim = torch.optim.SGD(model.parameters(),lr=params.lr, momentum=params.mom)
+    #optim = torch.optim.SGD(lin_net.parameters(),lr=params.lr, momentum=params.mom)
 
     loss_fn = torch.nn.BCELoss()
 
     for e in range(epoch_num):
-        
+        loss_avg = []
         # Train the model
         lin_net.train()
         for batch_idx, (data, label) in enumerate(train_loader):
@@ -52,13 +53,14 @@ if __name__ == '__main__':
             loss = loss_fn(outputs, label)
             loss.backward()
             optim.step()
+            loss_avg.append(loss.item())
             
 
         if e % 10 == 0:
-            print("Epoch [{}/{}] \t Loss: {}".format(e, epoch_num, loss.item()))
+            print("Epoch [{}/{}] \t Loss: {}".format(e, epoch_num,np.mean(loss_avg)))
 
     
     #optimize(fc_net, train_batchlists, params)
     test_set = list(test_loader)
-    create_heatmap(lin_net,input_folder)
+    create_heatmap(lin_net,input_folder,view)
     perf_list = performance(lin_net, test_set)
