@@ -1,11 +1,13 @@
-import sys, os
+import sys, os, json
 import torch
 import argparse
+from datetime import datetime
+
 sys.path.append('src') 
 from load_data import *
-from parameter import Parameter
+#from parameter import Parameter
 from cnn_net import CNNNet
-from helper_gen import make_parser, performance, optimize
+from helper_gen import performance
 from heatmap import *
 
 from torch.utils.tensorboard import SummaryWriter
@@ -13,39 +15,52 @@ from torch.utils.tensorboard import SummaryWriter
 pwd = os.getcwd()
         
 if __name__ == '__main__':
+    # Print start time
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("Start Time =", current_time)
+    
     parser = argparse.ArgumentParser(description='CNN Main')
     parser.add_argument('--input', default ='src/torch_data',type=str, help="location for input file")
     parser.add_argument('--view', default='local',type=str,help="view")
-    parser.add_argument('--param', default='param/cnn_local.json',type=str,help="location of parameter file")
-    parser.add_argument('--result', default='result/',type=str,help="location of parameter file")
-
-   
+    parser.add_argument('--param', default='cnn_local.json',type=str,help="location of parameter file")
+    #parser.add_argument('--result', default='result/',type=str,help="location of results")
+    parser.add_argument('-v', default=1 , help="Verbosity (0 = no command line output, 1 = print training loss")
     args = parser.parse_args()
 
-    param_file = args.param
+    # Check if view is valid
+    if (args.view != 'local' and args.view != 'global' and args.view != 'both'):
+        print("Error: view needs to be local, global or both")
+        sys.exit(1)
+    else:
+        view = args.view
 
-    params = Parameter(param_file, pwd)
     input_folder = args.input
-    view = args.view
-    result_file = args.result
-    epoch_num = params.epoch
+    #result_file = args.result
 
-    train_loader, test_loader = dataPrep(input_folder, params.trainbs, params.testbs)
-    cnn_net = CNNNet(view)
-    beta_l = 0.9
-    beta_h = 0.999
-    amsgrad = 0
-    optim = torch.optim.Adam(cnn_net.parameters(), lr=params.lr, betas=(beta_l, beta_h), amsgrad=amsgrad)
-    #optim = torch.optim.Adam(cnn_net.parameters(), lr=params.lr, betas=(0.9, 0.999), amsgrad=False)
+    # Get parameters from json parameter file
+    #params = Parameter(param_file, pwd)
+    param_file = args.param
+    with open(os.path.join('param', param_file)) as paramfile:
+        params = json.load(paramfile)
 
-    # optim = torch.optim.SGD(model.parameters(),lr=params.lr, momentum=params.mom)
+    lr = params['optim']['learning rate']
+    beta_l = params['optim']['beta 1']
+    beta_h = params['optim']['beta 2']
+    epsilon = params['optim']['epsilon']
+    amsgrad = params['optim']['amsgrad']
 
-    test_set = list(test_loader)
+    num_epochs = params['training']['num epochs']
+    trainbs = params['training']['batch size']
+    testbs = params['testing']['batch size']
 
-    loss_fn = torch.nn.BCELoss()
+    res_path = params['output']['results path']
+    run_ID = params['output']['results name']
 
-    res_path = "./runs/"
-    run_ID = 'cnn_local_test_2'  # Update the run_ID to see comparison of different runs
+
+    # Create directory and files for TensorBoard
+    #res_path = "./runs/"
+    #run_ID = 'cnn_local_test'  # Update the run_ID to see comparison of different runs
     tb_ID = res_path + run_ID
     for i in range(1, 500):
         cur_name = (res_path + run_ID + '_{}'.format(str(i)))
@@ -54,69 +69,125 @@ if __name__ == '__main__':
             break
 
     print(tb_ID)
-
-    
     writer = SummaryWriter(tb_ID)
 
-    for e in range(epoch_num):
+    # Training and Testing data
+    #train_loader, test_loader = dataPrep(input_folder, params.trainbs, params.testbs)
+    train_loader, test_loader = dataPrep(input_folder, trainbs, testbs)
+    train_set = list(train_loader)
+    test_set = list(test_loader)
+
+    # Model, optimizer and loss function
+    cnn_net = CNNNet(view)
+    optim = torch.optim.Adam(cnn_net.parameters(), lr=lr, betas=(beta_l, beta_h), amsgrad=amsgrad)
+    loss_fn = torch.nn.BCELoss()
+
+
+    for e in range(num_epochs):
         
         # Train the model
         cnn_net.train()
-        for batch_idx, (data, label) in enumerate(train_loader):
-
+        train_loss_val = 0
+        for batch_idx_train, (data_train, label_train) in enumerate(train_loader):
             optim.zero_grad()
-            outputs = cnn_net(data)
-            label = torch.reshape(label,(len(label),-1))
-            loss = loss_fn(outputs, label)
-            loss.backward()
+            outputs_train = cnn_net(data_train)
+            label_train = torch.reshape(label_train,(len(label_train),-1))
+            loss_train = loss_fn(outputs_train, label_train)
+            loss_train.backward()
             optim.step()
-            loss_f = float(loss.item())
-            
+            loss_f_train = float(loss_train.item())
+            train_loss_val += loss_f_train
 
+        # Obtain performance metrics for training
+        perf_list_train = performance(cnn_net, train_set)
+
+
+        # Test the model
+        cnn_net.eval()
+        test_loss_val = 0
+        with torch.no_grad():
+            for batch_idx_test, (data_test, label_test) in enumerate(test_loader):
+                outputs_test = cnn_net(data_test)
+                label_test = torch.reshape(label_test,(len(label_test),-1))
+                loss_test = loss_fn(outputs_test, label_test)
+                loss_f_test = float(loss_test.item())
+                test_loss_val += loss_f_test
+        
+        # Obtain performance metrics for testing
+        perf_list_test = performance(cnn_net, test_set)
+
+        # Print training loss
         if e % 1 == 0:
-            print("Epoch [{}/{}] \t Loss: {}".format(e+1, epoch_num, loss.item()))
+            print("Epoch [{}/{}] \t Train Loss: {}".format(e+1, num_epochs, train_loss_val/len(train_set)))
 
-        perf_list = performance(cnn_net, test_set)
+        # Add all metrics to TensorBoard
+        writer.add_scalar('Training loss', train_loss_val, float(e))
+        writer.add_scalar('Training accuracy', float(perf_list_train[0]), float(e))
+        writer.add_scalar('Training precision', float(perf_list_train[1]), float(e))
+        writer.add_scalar('Training recall', float(perf_list_train[2]), float(e))
+        writer.add_scalar('Training AUC', float(perf_list_train[3]), float(e))
 
-        writer.add_scalar('Training loss', loss_f, float(e))
-        writer.add_scalar('Training accuracy', float(perf_list[0]), float(e))
-        writer.add_scalar('Training precision', float(perf_list[1]), float(e))
-        writer.add_scalar('Training recall', float(perf_list[2]), float(e))
-        writer.add_scalar('Training AUC', float(perf_list[3]), float(e))
+        writer.add_scalar('Test loss', test_loss_val, float(e))
+        writer.add_scalar('Test accuracy', float(perf_list_test[0]), float(e))
+        writer.add_scalar('Test precision', float(perf_list_test[1]), float(e))
+        writer.add_scalar('Test recall', float(perf_list_test[2]), float(e))
+        writer.add_scalar('Test AUC', float(perf_list_test[3]), float(e))
 
+
+    # Important training/testing parameters
     tf_params = {
-        "epochs": float(params.epoch),
-        "lr": float(params.lr),
-        "momentum": float(params.mom),
-        "training bs": float(params.trainbs),
+        "epochs": float(num_epochs),
+        "lr": float(lr),
         "beta lower": beta_l,
         "beta upper": beta_h,
-        "amsgrad": amsgrad
+        "amsgrad": amsgrad,
+        "epsilon": epsilon,
+        "training bs": float(trainbs),
+        "testing bs": float(testbs)
     }
 
+    # Add last performance metrics to TensorBoard
     tf_metric = {
-        "Training loss": loss_f,
-        "Training accuracy": float(perf_list[0]),
-        "Training precision": float(perf_list[1]),
-        "Training recall": float(perf_list[2]),
-        "Training AUC": float(perf_list[3])
+        "Training loss": train_loss_val,
+        "Training accuracy": float(perf_list_train[0]),
+        "Training precision": float(perf_list_train[1]),
+        "Training recall": float(perf_list_train[2]),
+        "Training AUC": float(perf_list_train[3]),
+        "Test loss": train_loss_val,
+        "Test accuracy": float(perf_list_test[0]),
+        "Test precision": float(perf_list_test[1]),
+        "Test recall": float(perf_list_test[2]),
+        "Test AUC": float(perf_list_test[3])
     }
+
+    print()
+    print("TensorBoard Params:")
     print(tf_params)
+    print()
 
     writer.add_hparams(tf_params, tf_metric)
-
     writer.close()
-    print("Finished")
     # To open tensorboard, run in terminal:
     # tensorboard --logdir=runs
     #optimize(fc_net, train_batchlists, params)
 
-    # perf_list = performance(fc_net, test_set)
+    # Print final performance metrics
     # [acc, prec, rec, AUC]
-    print(perf_list)
+    print("Train \t acc \t prec \t rec \t AUC")
+    print(perf_list_train)
+    print()
+    print("Test \t acc \t prec \t rec \t AUC")
+    print(perf_list_test)
+    print()
 
-    
+    # Print end time
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("End Time =", current_time)
+
+    print("Finished")
+
+    # Create heatmap
     #optimize(cnn_net, train_batchlists, params)
     #test_set = list(test_loader)
-    #create_heatmap(cnn_net, input_folder,view)
-    #perf_list = performance(cnn_net, test_set)
+    create_heatmap(cnn_net, input_folder, view)

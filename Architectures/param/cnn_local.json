@@ -1,1 +1,20 @@
-{"data": [{"train_batchsize": "64", "test_batchsize": "3148", "epoch": "10"}], "optim": [{"learning_rate": "1e-5", "training_iterations": "1000", "momentum": "0.95"}]}
+{
+	"optim":{
+		"learning rate": 1e-5,
+		"beta 1": 0.9,
+		"beta 2": 0.999,
+		"epsilon": 1e-8,
+		"amsgrad": 0
+	},
+	"training":{
+		"num epochs": 10,
+		"batch size": 64
+	},
+	"testing":{
+		"batch size": 3148
+	},
+	"output":{
+		"results path": "./runs/",
+		"results name": "cnn_local_test"
+	}
+}
