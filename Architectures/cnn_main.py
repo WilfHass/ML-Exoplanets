@@ -49,6 +49,7 @@ if __name__ == '__main__':
     beta_h = params['optim']['beta 2']
     epsilon = params['optim']['epsilon']
     amsgrad = params['optim']['amsgrad']
+    wd = params['optim']['weight decay']
 
     num_epochs = params['training']['num epochs']
     trainbs = params['training']['batch size']
@@ -79,7 +80,7 @@ if __name__ == '__main__':
 
     # Model, optimizer and loss function
     cnn_net = CNNNet(view)
-    optim = torch.optim.Adam(cnn_net.parameters(), lr=lr, betas=(beta_l, beta_h), amsgrad=amsgrad)
+    optim = torch.optim.Adam(cnn_net.parameters(), lr=lr, betas=(beta_l, beta_h), eps=epsilon, weight_decay=wd, amsgrad=amsgrad)
     loss_fn = torch.nn.BCELoss()
 
 
@@ -173,10 +174,12 @@ if __name__ == '__main__':
 
     # Print final performance metrics
     # [acc, prec, rec, AUC]
-    print("Train \t acc \t prec \t rec \t AUC")
+    print("Training:")
+    print("acc \t prec \t rec \t AUC")
     print(perf_list_train)
     print()
-    print("Test \t acc \t prec \t rec \t AUC")
+    print("Testing:")
+    print("acc \t prec \t rec \t AUC")
     print(perf_list_test)
     print()
 
