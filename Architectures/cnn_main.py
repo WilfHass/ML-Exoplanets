@@ -22,7 +22,8 @@ if __name__ == '__main__':
     print("Start Time =", current_time)
     
     parser = argparse.ArgumentParser(description='CNN Main')
-    parser.add_argument('--input', default =os.path.join('src','torch_data'),type=str, help="location for input data files")
+    parser.add_argument('--input', default =os.path.join('src', 'torch_data'),type=str, help="location for input data files")
+    # parser.add_argument('--input', default =os.path.join('src', 'torch_data_ID'),type=str, help="location for input data files")
     parser.add_argument('--view', default='local',type=str,help="view of data (as described in paper): can be local, global or both; default: local")
     parser.add_argument('--param', default='cnn_local.json',type=str,help="location of parameter file")
     parser.add_argument('--result', default='results/',type=str,help="location of results")
@@ -90,10 +91,16 @@ if __name__ == '__main__':
         # Train the model
         cnn_net.train()
         train_loss_val = 0
-        for batch_idx_train, (data_train, label_train) in enumerate(train_loader):
+        for batch_idx_train, (data_train, labels_train) in enumerate(train_loader):
             optim.zero_grad()
             outputs_train = cnn_net(data_train)
-            label_train = torch.reshape(label_train,(len(label_train),-1))
+
+            label_train = labels_train[0]
+            if len(labels_train) == 3:
+                kepid = labels_train[1]
+                tce_plnt_num = labels_train[2]
+
+            label_train = torch.reshape(label_train, (len(label_train), -1))
             loss_train = loss_fn(outputs_train, label_train)
             loss_train.backward()
             optim.step()
@@ -110,8 +117,14 @@ if __name__ == '__main__':
         cnn_net.eval()
         test_loss_val = 0
         with torch.no_grad():
-            for batch_idx_test, (data_test, label_test) in enumerate(test_loader):
+            for batch_idx_test, (data_test, labels_test) in enumerate(test_loader):
                 outputs_test = cnn_net(data_test)
+
+                label_test = labels_test[0]
+                if len(labels_test) == 3:
+                    kepid = labels_test[1]
+                    tce_plnt_num = labels_test[2]
+
                 label_test = torch.reshape(label_test,(len(label_test),-1))
                 loss_test = loss_fn(outputs_test, label_test)
                 loss_f_test = float(loss_test.item())
@@ -139,6 +152,8 @@ if __name__ == '__main__':
         writer.add_scalar('Test recall', float(perf_list_test[2]), float(e))
         writer.add_scalar('Test AUC', float(perf_list_test[3]), float(e))
 
+        print(perf_list_test)
+
 
     # Important training/testing parameters
     tf_params = {
@@ -150,8 +165,10 @@ if __name__ == '__main__':
         "epsilon": epsilon,
         "weight decay": wd,
         "training bs": float(trainbs),
-        "testing bs": float(testbs)
+        "testing bs": float(testbs),
+        "view": view
     }
+
 
     # Add last performance metrics to TensorBoard
     tf_metric = {
@@ -199,7 +216,7 @@ if __name__ == '__main__':
     # Create heatmap
     #optimize(cnn_net, train_batchlists, params)
     #test_set = list(test_loader)
-    create_heatmap(cnn_net, input_folder, view)
+    # create_heatmap(cnn_net, input_folder, view)
 
 
     # Plot precision-recall plot
@@ -207,7 +224,7 @@ if __name__ == '__main__':
     with torch.no_grad():
         for batch_idx, (data, label) in enumerate(test_loader):
             outputs = cnn_net(data_test)
-            np.savetxt(os.path.join(res_path, 'precision_recall_' + out_file + '.csv'), outputs, delimiter=',')
-            torch.save(outputs, os.path.join(res_path, 'precision_recall_' + out_file + '.pt'))
+            # np.savetxt(os.path.join(res_path, 'precision_recall_' + out_file + '.csv'), outputs, delimiter=',')
+            # torch.save(outputs, os.path.join(res_path, 'precision_recall_' + out_file + '.pt'))
             labels = torch.reshape(label_test,(len(label_test),-1))
             compare_thresholds(outputs, labels, 'precision_recall_' + out_file)

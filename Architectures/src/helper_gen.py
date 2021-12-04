@@ -31,7 +31,6 @@ def precision(outputs,labels):
     for i in range(len(outputs)):
         if outputs[i]==1.0 and labels[i]==1.0:
             count+=1
-#     count = sum(np.equal(outputs, labels))
     total = sum(labels)
     if total == 0:
         prec = 0
@@ -120,12 +119,14 @@ def performance(fin_model, test_set):
     '''
     
 
-    inputs, labels = test_set[0][0], test_set[0][1]
+    inputs, labels = test_set[0][0], test_set[0][1][0]
+    ## test_set[0][1][0] instead of test_set[0][1] to accomodate that labels are a list.
     outputs = fin_model.forward(inputs)
 
     classification_threshold = 0.5
 
     labels = labels.detach().numpy().flatten()
+    # print(labels)
     outputs = outputs.detach().numpy().flatten()
 
     # Classify the outputs
