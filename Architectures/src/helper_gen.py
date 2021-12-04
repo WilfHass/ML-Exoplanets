@@ -111,17 +111,16 @@ def compare_thresholds(outputs, labels, out_file):
     plt.close()
 
 
-def performance(fin_model, test_set):
+def performance(model, test_set):
     '''
     Performance of the finished FCNN model using the test dataset. Calculates the Accuracy, Precision, AUC, Recall
     fin_model : Last model of the FCNN
     test_set : set of data to test the finished model
     '''
     
-
     inputs, labels = test_set[0][0], test_set[0][1][0]
 
-    outputs = fin_model(inputs)
+    outputs = model(inputs)
 
     classification_threshold = 0.5
 
@@ -130,23 +129,18 @@ def performance(fin_model, test_set):
 
     # Classify the outputs
     classified_outputs = is_TCE(outputs, classification_threshold)
-    # compare_thresholds(outputs, labels)
     
     # Accuracy
     acc = accuracy(classified_outputs, labels)
-    # print("Final Accuracy: ", acc)
     
     # AUC
     AUC = roc_auc_score(labels, classified_outputs)
-    # print("AUC: ", AUC)
     
     # Precision
     prec = precision(classified_outputs, labels)
-    # print("Final Precision: ", prec)
     
     # Recall 
     rec = recall(classified_outputs, labels)
-    # print("Final Recall: ", rec)
 
     return [acc, prec, rec, AUC]
 

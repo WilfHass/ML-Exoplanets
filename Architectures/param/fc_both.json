@@ -1,1 +1,1 @@
-{"data": [{"train_batchsize": "64", "test_batchsize": "3148", "epoch": "5"}], "optim": [{"learning_rate": "1e-5", "training_iterations": "1000", "momentum": "0.99"}]}
+{"data": [{"train_batchsize": "256", "test_batchsize": "3148", "epoch": "50"}], "optim": [{"learning_rate": "2e-4", "training_iterations": "1000", "momentum": "0.99"}]}

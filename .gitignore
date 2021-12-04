@@ -1,1 +1,8 @@
-/data/kepler
+/data/dr24_data
+/data/TFTensor_Torch_conversion/TorchTensors
+
+/Architectures/plots
+/Architectures/outputs
+.DS_Store
+*/*/__pycache__
+*/*/.ipynb_checkpoints
