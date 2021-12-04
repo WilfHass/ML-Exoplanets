@@ -1,1 +1,21 @@
-{"data": [{"train_batchsize": "256", "test_batchsize": "3148", "epoch": "100"}], "optim": [{"learning_rate": "2e-4", "training_iterations": "1000", "momentum": "0.99"}]}
+{
+	"optim":{
+		"learning rate": 2e-4,
+		"beta 1": 0.9,
+		"beta 2": 0.999,
+		"epsilon": 1e-8,
+		"amsgrad": 0,
+		"weight decay": 0.0
+	},
+	"training":{
+		"num epochs": 100,
+		"batch size": 256
+	},
+	"testing":{
+		"batch size": 3148
+	},
+	"output":{
+		"results path": "./runs/",
+		"results name": "fc_global_test"
+	}
+}
