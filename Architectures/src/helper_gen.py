@@ -133,21 +133,21 @@ def performance(fin_model, test_set):
     
     # Accuracy
     acc = accuracy(classified_outputs, labels)
-    print("Final Accuracy: ", acc)
+    # print("Final Accuracy: ", acc)
     
     # AUC
     AUC = roc_auc_score(labels, classified_outputs)
-    print("AUC: ", AUC)
+    # print("AUC: ", AUC)
     
     # Precision
     prec = precision(classified_outputs, labels)
-    print("Final Precision: ", prec)
+    # print("Final Precision: ", prec)
     
     # Recall 
     rec = recall(classified_outputs, labels)
-    print("Final Recall: ", rec)
+    # print("Final Recall: ", rec)
     
-    compare_thresholds(outputs, labels)
+    # compare_thresholds(outputs, labels)
 
     return [acc, prec, rec, AUC]
 
