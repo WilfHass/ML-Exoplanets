@@ -99,6 +99,8 @@ if __name__ == '__main__':
             loss_f_train = float(loss_train.item())
             train_loss_val += loss_f_train
 
+        train_loss_avg = train_loss_val/len(train_set)
+
         # Obtain performance metrics for training
         perf_list_train = performance(cnn_net, train_set)
 
@@ -113,22 +115,24 @@ if __name__ == '__main__':
                 loss_test = loss_fn(outputs_test, label_test)
                 loss_f_test = float(loss_test.item())
                 test_loss_val += loss_f_test
+
+        test_loss_avg = test_loss_val/len(test_set)
         
         # Obtain performance metrics for testing
         perf_list_test = performance(cnn_net, test_set)
 
         # Print training loss
         if e % 1 == 0:
-            print("Epoch [{}/{}] \t Train Loss: {}".format(e+1, num_epochs, train_loss_val/len(train_set)))
+            print("Epoch [{}/{}] \t Train Loss: {}".format(e+1, num_epochs, train_loss_avg))
 
         # Add all metrics to TensorBoard
-        writer.add_scalar('Training loss', train_loss_val, float(e))
+        writer.add_scalar('Training loss', train_loss_avg, float(e))
         writer.add_scalar('Training accuracy', float(perf_list_train[0]), float(e))
         writer.add_scalar('Training precision', float(perf_list_train[1]), float(e))
         writer.add_scalar('Training recall', float(perf_list_train[2]), float(e))
         writer.add_scalar('Training AUC', float(perf_list_train[3]), float(e))
 
-        writer.add_scalar('Test loss', test_loss_val, float(e))
+        writer.add_scalar('Test loss', test_loss_avg, float(e))
         writer.add_scalar('Test accuracy', float(perf_list_test[0]), float(e))
         writer.add_scalar('Test precision', float(perf_list_test[1]), float(e))
         writer.add_scalar('Test recall', float(perf_list_test[2]), float(e))
@@ -149,12 +153,12 @@ if __name__ == '__main__':
 
     # Add last performance metrics to TensorBoard
     tf_metric = {
-        "Training loss": train_loss_val,
+        "Training loss": train_loss_avg,
         "Training accuracy": float(perf_list_train[0]),
         "Training precision": float(perf_list_train[1]),
         "Training recall": float(perf_list_train[2]),
         "Training AUC": float(perf_list_train[3]),
-        "Test loss": train_loss_val,
+        "Test loss": test_loss_avg,
         "Test accuracy": float(perf_list_test[0]),
         "Test precision": float(perf_list_test[1]),
         "Test recall": float(perf_list_test[2]),
