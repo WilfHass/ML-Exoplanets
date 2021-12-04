@@ -80,7 +80,7 @@ def is_TCE(outputs, classification_threshold):
     return new_out
 
 
-def compare_thresholds(outputs, labels):
+def compare_thresholds(outputs, labels, out_file):
     '''
     Plots the precision vs recall for different classification thresholds.
     outputs : finished model using test set data
@@ -107,8 +107,9 @@ def compare_thresholds(outputs, labels):
     plt.plot(rec_list, pre_list)
     plt.ylabel("Precision")
     plt.xlabel("Recall")
+    plt.savefig(os.path.join('plots', out_file))
     plt.show()
-    plt.savefig("plots/precision-recall.pdf")
+    plt.close()
 
 
 def performance(fin_model, test_set):

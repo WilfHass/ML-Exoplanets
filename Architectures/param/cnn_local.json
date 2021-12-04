@@ -3,12 +3,12 @@
 		"learning rate": 1e-5,
 		"beta 1": 0.9,
 		"beta 2": 0.999,
-		"epsilon": 1e-7,
+		"epsilon": 1e-8,
 		"amsgrad": 0,
 		"weight decay": 0.0
 	},
 	"training":{
-		"num epochs": 50,
+		"num epochs": 1,
 		"batch size": 64
 	},
 	"testing":{
@@ -16,6 +16,6 @@
 	},
 	"output":{
 		"results path": "./runs/",
-		"results name": "cnn_local_test_bs"
+		"results name": "cnn_local_test"
 	}
 }

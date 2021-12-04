@@ -1,5 +1,6 @@
 import sys, os, json
 import torch
+import numpy as np
 import argparse
 from datetime import datetime
 
@@ -7,7 +8,7 @@ sys.path.append('src')
 from load_data import *
 #from parameter import Parameter
 from cnn_net import CNNNet
-from helper_gen import performance
+from helper_gen import *
 from heatmap import *
 
 from torch.utils.tensorboard import SummaryWriter
@@ -21,11 +22,11 @@ if __name__ == '__main__':
     print("Start Time =", current_time)
     
     parser = argparse.ArgumentParser(description='CNN Main')
-    parser.add_argument('--input', default ='src/torch_data',type=str, help="location for input file")
-    parser.add_argument('--view', default='local',type=str,help="view")
+    parser.add_argument('--input', default =os.path.join('src','torch_data'),type=str, help="location for input data files")
+    parser.add_argument('--view', default='local',type=str,help="view of data (as described in paper): can be local, global or both; default: local")
     parser.add_argument('--param', default='cnn_local.json',type=str,help="location of parameter file")
-    #parser.add_argument('--result', default='result/',type=str,help="location of results")
-    parser.add_argument('-v', default=1 , help="Verbosity (0 = no command line output, 1 = print training loss")
+    parser.add_argument('--result', default='results/',type=str,help="location of results")
+    parser.add_argument('-v', default=1 , help="Verbosity (0 = no command line output, 1 = print training loss); default: 1")
     args = parser.parse_args()
 
     # Check if view is valid
@@ -36,7 +37,8 @@ if __name__ == '__main__':
         view = args.view
 
     input_folder = args.input
-    #result_file = args.result
+    res_path = args.result
+    verbosity = args.v
 
     # Get parameters from json parameter file
     #params = Parameter(param_file, pwd)
@@ -55,18 +57,17 @@ if __name__ == '__main__':
     trainbs = params['training']['batch size']
     testbs = params['testing']['batch size']
 
-    res_path = params['output']['results path']
+    run_path = params['output']['results path']
     run_ID = params['output']['results name']
 
 
     # Create directory and files for TensorBoard
-    #res_path = "./runs/"
-    #run_ID = 'cnn_local_test'  # Update the run_ID to see comparison of different runs
-    tb_ID = res_path + run_ID
-    for i in range(1, 500):
-        cur_name = (res_path + run_ID + '_{}'.format(str(i)))
+    tb_ID = run_path + run_ID
+    for i in range(1, 5000):
+        cur_name = (run_path + run_ID + '_{}'.format(str(i)))
         if not os.path.isdir(cur_name):
             tb_ID = cur_name
+            out_file = run_ID + '_{}'.format(str(i)) + '.png'
             break
 
     print(tb_ID)
@@ -122,7 +123,7 @@ if __name__ == '__main__':
         perf_list_test = performance(cnn_net, test_set)
 
         # Print training loss
-        if e % 1 == 0:
+        if verbosity and e % 1 == 0:
             print("Epoch [{}/{}] \t Train Loss: {}".format(e+1, num_epochs, train_loss_avg))
 
         # Add all metrics to TensorBoard
@@ -147,6 +148,7 @@ if __name__ == '__main__':
         "beta upper": beta_h,
         "amsgrad": amsgrad,
         "epsilon": epsilon,
+        "weight decay": wd,
         "training bs": float(trainbs),
         "testing bs": float(testbs)
     }
@@ -198,3 +200,14 @@ if __name__ == '__main__':
     #optimize(cnn_net, train_batchlists, params)
     #test_set = list(test_loader)
     create_heatmap(cnn_net, input_folder, view)
+
+
+    # Plot precision-recall plot
+    cnn_net.eval()
+    with torch.no_grad():
+        for batch_idx, (data, label) in enumerate(test_loader):
+            outputs = cnn_net(data_test)
+            np.savetxt(os.path.join(res_path, 'precision_recall_' + out_file + '.csv'), outputs, delimiter=',')
+            torch.save(outputs, os.path.join(res_path, 'precision_recall_' + out_file + '.pt'))
+            labels = torch.reshape(label_test,(len(label_test),-1))
+            compare_thresholds(outputs, labels, 'precision_recall_' + out_file)
