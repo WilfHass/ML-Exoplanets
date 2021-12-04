@@ -22,11 +22,11 @@ if __name__ == '__main__':
     print("Start Time =", current_time)
     
     parser = argparse.ArgumentParser(description='CNN Main')
-    parser.add_argument('--input', default=os.path.join('src','torch_data'), type=str, help="location for input data files")
-    parser.add_argument('--view', default='local', type=str, help="view of data (as described in paper): can be local, global or both; default: local")
-    parser.add_argument('--param', default='cnn_local.json', type=str, help="location of parameter file")
-    parser.add_argument('--result', default='results/', type=str, help="location of results")
-    parser.add_argument('-v', default=1, help="Verbosity (0 = no command line output, 1 = print training loss); default: 1")
+    parser.add_argument('--input', default =os.path.join('src', 'torch_data_ID'),type=str, help="location for input data files")
+    parser.add_argument('--view', default='local',type=str,help="view of data (as described in paper): can be local, global or both; default: local")
+    parser.add_argument('--param', default='cnn_local.json',type=str,help="location of parameter file")
+    parser.add_argument('--result', default='results/',type=str,help="location of results")
+    parser.add_argument('-v', default=1 , help="Verbosity (0 = no command line output, 1 = print training loss); default: 1")
     args = parser.parse_args()
 
     # Check if view is valid
@@ -91,15 +91,18 @@ if __name__ == '__main__':
         # Train the model
         cnn_net.train()
         train_loss_val = 0
-
-        for batch_idx_train, (data_train, label_train) in enumerate(train_loader):
-            
-            # Send labels to gpu
-            label_train = label_train.to(device)
+        for batch_idx_train, (data_train, labels_train) in enumerate(train_loader):
             optim.zero_grad()
 
             # Get outputs and losses
             outputs_train = cnn_net(data_train)
+
+            label_train = labels_train[0]
+            if len(labels_train) == 3:
+                kepid = labels_train[1]
+                tce_plnt_num = labels_train[2]
+            
+            label_train = label_train.to(device)
             label_train = label_train.view(-1, 1)
             loss_train = loss_fn(outputs_train, label_train)
             
@@ -118,9 +121,13 @@ if __name__ == '__main__':
         cnn_net.eval()
         test_loss_val = 0
         with torch.no_grad():
-            for batch_idx_test, (data_test, label_test) in enumerate(test_loader):
-
+            for batch_idx_test, (data_test, labels_test) in enumerate(test_loader):
                 outputs_test = cnn_net(data_test)
+
+                label_test = labels_test[0]
+                if len(labels_test) == 3:
+                    kepid = labels_test[1]
+                    tce_plnt_num = labels_test[2]
 
                 label_test = label_test.to(device)
                 label_test = label_test.view(-1, 1)
@@ -151,6 +158,8 @@ if __name__ == '__main__':
         writer.add_scalar('Test recall', float(perf_list_test[2]), float(e))
         writer.add_scalar('Test AUC', float(perf_list_test[3]), float(e))
 
+        print(perf_list_test)
+
 
     # Important training/testing parameters
     tf_params = {
@@ -162,8 +171,10 @@ if __name__ == '__main__':
         "epsilon": epsilon,
         "weight decay": wd,
         "training bs": float(trainbs),
-        "testing bs": float(testbs)
+        "testing bs": float(testbs),
+        "view": view
     }
+
 
     # Add last performance metrics to TensorBoard
     tf_metric = {

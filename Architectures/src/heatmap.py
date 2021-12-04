@@ -15,7 +15,8 @@ def get_data(input_folder):
     train_dataset = list(Data(train_data))
     planet_view = []
     for i in range(len(train_dataset)):
-        if train_dataset[i][1] == 1.0:
+        if train_dataset[i][1][0] == 1.0:
+            # Changed from [i][1] to [i][1][0] for the new list format of the labels
             planet_view.append(train_dataset[i][0])
             
     return planet_view

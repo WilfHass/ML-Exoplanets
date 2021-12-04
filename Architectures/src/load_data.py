@@ -38,9 +38,10 @@ class Data(Dataset):
 
     def __getitem__(self, idx):
         ''' Gets an individual sample given an index'''
-        data = self.data[idx, :-1]
-        label = self.data[idx, -1] # Gets the label of the img
-        return data, label
+        data = self.data[idx, :2202]
+        labels = list(self.data[idx, 2202:]) # Gets the label, kepid, tce_plnt_num
+
+        return data, labels
 
 
 def dataPrep(input_folder, batch_size,test_batch_size):
