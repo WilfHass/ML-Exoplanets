@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class CNNNet(nn.Module):
-    def __init__(self, view):
+    def __init__(self, view, device):
         '''
         Convolutional Neural Network
         size : size of data
@@ -12,6 +12,7 @@ class CNNNet(nn.Module):
         super(CNNNet, self).__init__()
 
         self.view = view
+        self.device = device
 
         self.local_length = 201
         self.global_length = 2001
@@ -77,6 +78,7 @@ class CNNNet(nn.Module):
         Feed forward propogation
         x : data input of batch size by 2201
         '''
+        x = x.to(self.device)
         # DOUBLE CHECK SLICING (upper limit is exclusive so only goes up to 200 and 2200)
         x_local = x[:, :201]
         x_global = x[:, 201:]

@@ -4,14 +4,15 @@
 		"beta 1": 0.9,
 		"beta 2": 0.999,
 		"epsilon": 1e-8,
-		"amsgrad": 0
+		"amsgrad": 0,
+		"weight decay": 0.0
 	},
 	"training":{
 		"num epochs": 10,
 		"batch size": 64
 	},
 	"testing":{
-		"batch size": 3148
+		"batch size": 787
 	},
 	"output":{
 		"results path": "./runs/",

@@ -22,11 +22,11 @@ if __name__ == '__main__':
     print("Start Time =", current_time)
     
     parser = argparse.ArgumentParser(description='CNN Main')
-    parser.add_argument('--input', default =os.path.join('src','torch_data'),type=str, help="location for input data files")
-    parser.add_argument('--view', default='local',type=str,help="view of data (as described in paper): can be local, global or both; default: local")
-    parser.add_argument('--param', default='cnn_local.json',type=str,help="location of parameter file")
-    parser.add_argument('--result', default='results/',type=str,help="location of results")
-    parser.add_argument('-v', default=1 , help="Verbosity (0 = no command line output, 1 = print training loss); default: 1")
+    parser.add_argument('--input', default=os.path.join('src','torch_data'), type=str, help="location for input data files")
+    parser.add_argument('--view', default='local', type=str, help="view of data (as described in paper): can be local, global or both; default: local")
+    parser.add_argument('--param', default='cnn_local.json', type=str, help="location of parameter file")
+    parser.add_argument('--result', default='results/', type=str, help="location of results")
+    parser.add_argument('-v', default=1, help="Verbosity (0 = no command line output, 1 = print training loss); default: 1")
     args = parser.parse_args()
 
     # Check if view is valid
@@ -60,6 +60,7 @@ if __name__ == '__main__':
     run_path = params['output']['results path']
     run_ID = params['output']['results name']
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Create directory and files for TensorBoard
     tb_ID = run_path + run_ID
@@ -80,7 +81,7 @@ if __name__ == '__main__':
     test_set = list(test_loader)
 
     # Model, optimizer and loss function
-    cnn_net = CNNNet(view)
+    cnn_net = CNNNet(view, device).to(device)
     optim = torch.optim.Adam(cnn_net.parameters(), lr=lr, betas=(beta_l, beta_h), eps=epsilon, weight_decay=wd, amsgrad=amsgrad)
     loss_fn = torch.nn.BCELoss()
 
@@ -90,29 +91,39 @@ if __name__ == '__main__':
         # Train the model
         cnn_net.train()
         train_loss_val = 0
+
         for batch_idx_train, (data_train, label_train) in enumerate(train_loader):
+            
+            # Send labels to gpu
+            label_train = label_train.to(device)
             optim.zero_grad()
+
+            # Get outputs and losses
             outputs_train = cnn_net(data_train)
-            label_train = torch.reshape(label_train,(len(label_train),-1))
+            label_train = label_train.view(-1, 1)
             loss_train = loss_fn(outputs_train, label_train)
+            
             loss_train.backward()
             optim.step()
             loss_f_train = float(loss_train.item())
             train_loss_val += loss_f_train
 
-        train_loss_avg = train_loss_val/len(train_set)
+        train_loss_avg = train_loss_val/len(train_loader.dataset)
 
         # Obtain performance metrics for training
         perf_list_train = performance(cnn_net, train_set)
 
 
-        # Test the model
+        # Validate the model
         cnn_net.eval()
         test_loss_val = 0
         with torch.no_grad():
             for batch_idx_test, (data_test, label_test) in enumerate(test_loader):
+
                 outputs_test = cnn_net(data_test)
-                label_test = torch.reshape(label_test,(len(label_test),-1))
+
+                label_test = label_test.to(device)
+                label_test = label_test.view(-1, 1)
                 loss_test = loss_fn(outputs_test, label_test)
                 loss_f_test = float(loss_test.item())
                 test_loss_val += loss_f_test
@@ -125,6 +136,7 @@ if __name__ == '__main__':
         # Print training loss
         if verbosity and e % 1 == 0:
             print("Epoch [{}/{}] \t Train Loss: {}".format(e+1, num_epochs, train_loss_avg))
+            print("Test Loss: {}".format(test_loss_avg))
 
         # Add all metrics to TensorBoard
         writer.add_scalar('Training loss', train_loss_avg, float(e))
@@ -181,12 +193,10 @@ if __name__ == '__main__':
     # Print final performance metrics
     # [acc, prec, rec, AUC]
     print("Training:")
-    print("acc \t prec \t rec \t AUC")
-    print(perf_list_train)
+    print("acc: {} \t prec: {} \t rec: {} \t AUC: {}".format(perf_list_train[0], perf_list_train[1], perf_list_train[2], perf_list_train[3]))
     print()
     print("Testing:")
-    print("acc \t prec \t rec \t AUC")
-    print(perf_list_test)
+    print("acc: {} \t prec: {} \t rec: {} \t AUC: {}".format(perf_list_test[0], perf_list_test[1], perf_list_test[2], perf_list_test[3]))
     print()
 
     # Print end time
@@ -199,15 +209,16 @@ if __name__ == '__main__':
     # Create heatmap
     #optimize(cnn_net, train_batchlists, params)
     #test_set = list(test_loader)
-    create_heatmap(cnn_net, input_folder, view)
+    # create_heatmap(cnn_net, input_folder, view)
 
 
     # Plot precision-recall plot
     cnn_net.eval()
     with torch.no_grad():
         for batch_idx, (data, label) in enumerate(test_loader):
-            outputs = cnn_net(data_test)
-            np.savetxt(os.path.join(res_path, 'precision_recall_' + out_file + '.csv'), outputs, delimiter=',')
-            torch.save(outputs, os.path.join(res_path, 'precision_recall_' + out_file + '.pt'))
-            labels = torch.reshape(label_test,(len(label_test),-1))
-            compare_thresholds(outputs, labels, 'precision_recall_' + out_file)
+
+            outputs = cnn_net(data)
+            # np.savetxt(os.path.join(res_path, 'precision_recall_' + out_file + '.csv'), outputs, delimiter=',')
+            # torch.save(outputs, os.path.join(res_path, 'precision_recall_' + out_file + '.pt'))
+            label = label.view(-1, 1) # torch.reshape(label_test, (len(label_test), -1))
+            # compare_thresholds(outputs, label, 'precision_recall_' + out_file)

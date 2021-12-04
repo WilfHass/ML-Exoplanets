@@ -121,12 +121,13 @@ def performance(fin_model, test_set):
     
 
     inputs, labels = test_set[0][0], test_set[0][1]
-    outputs = fin_model.forward(inputs)
+
+    outputs = fin_model(inputs)
 
     classification_threshold = 0.5
 
-    labels = labels.detach().numpy().flatten()
-    outputs = outputs.detach().numpy().flatten()
+    labels = labels.detach().cpu().numpy().flatten()
+    outputs = outputs.detach().cpu().numpy().flatten()
 
     # Classify the outputs
     classified_outputs = is_TCE(outputs, classification_threshold)

@@ -51,7 +51,8 @@ def create_heatmap(model,input_folder,view):
                 new_spectrum[int(i)] = 0.0
                 
         #Probability of the new spectrum being a planet
-        prob = model(torch.reshape(new_spectrum,(1,len(new_spectrum))))
+        new_data = new_spectrum.view(1, -1) # torch.reshape(new_spectrum, (1,len(new_spectrum)))
+        prob = model(new_data)
         
         #Add this specific window and its probability to a list
         windows.append(window)
