@@ -48,17 +48,12 @@ class CNNNet(nn.Module):
 
         ## Fully connected layers
         # Local view
-        #self.fc_in_local = nn.Linear(32 * 5, 512, bias=True)  # output of conv1d is 32*5 ? --> only *5 once because 1d not 2d convolution?
-        #self.fc_in_local = nn.Linear(1280, 512, bias=True)  # Where the heck does 1280 come from????
-        self.fc_in_local = nn.Linear(1472, 512, bias=True)  # Where the heck does 1280 come from????
+        self.fc_in_local = nn.Linear(1472, 512, bias=True)  # 1280?
 
         # Global view
-        #self.fc_in_global = nn.Linear(256 * 5, 512, bias=True)  # output of conv1d is 256*5 ? --> only *5 once because 1d not 2d convolution?
-        #self.fc_in_global = nn.Linear(13056, 512, bias=True)    # Where in the heck does 13056 come from!?!?!?!?!
-        self.fc_in_global = nn.Linear(15104, 512, bias=True)    # Where in the heck does 13056 come from!?!?!?!?!
+        self.fc_in_global = nn.Linear(15104, 512, bias=True)    # 13056?
 
         # Both global and local view
-        #self.fc_in_both = nn.Linear(1280 + 13056, 512, bias=True)  # output of conv1d is 32*5 + 256*5 ? --> only *5 once because 1d not 2d convolution?
         self.fc_in_both = nn.Linear(1472 + 15104, 512, bias=True)
 
         # FC layers for all views
@@ -74,34 +69,29 @@ class CNNNet(nn.Module):
         Feed forward propogation
         x : data input of batch size by 2201
         '''
-        x = x.to(self.device)
-        x_local = x[:, :201]
-        x_global = x[:, 201:]
 
+        # Get local and global view TCEs
+        x = x.to(self.device)
+        x_local = x[:, :self.local_length]
+        x_global = x[:, self.local_length:]
+
+        # Add extra dimension to allow for convolutions
         x_local = torch.unsqueeze(x_local, dim=1)
         x_global = torch.unsqueeze(x_global, dim=1)
 
-        #x = torch.unsqueeze(x, dim=1)
-        #print(x.shape)
-
+        # Local view convolutional column + first FC layer
         if (self.view == "local"):
-            #x = torch.unsqueeze(local_data, dim=1)
-            #x = x.view(-1, 1, self.local_length)
-
             conv_output = self.forward_conv_local(x_local)
-            #print(len(conv_output))    #???
             conv_output = torch.flatten(conv_output, 1)
-            #print(conv_output.shape)
             h1 = F.relu(self.fc_in_local(conv_output))
-            #print(h1.shape)
 
+        # Global view convolutional column + first FC layer
         elif (self.view == "global"):
-            #x = torch.unsqueeze(global_data, dim=1)
-
             conv_output = self.forward_conv_global(x_global)
             conv_output = torch.flatten(conv_output, 1)
             h1 = F.relu(self.fc_in_global(conv_output))
 
+        # Local and Global view convolutional columns + first FC layer
         elif (self.view == "both"):
             local_conv_output = self.forward_conv_local(x_local)
             global_conv_output = self.forward_conv_global(x_global)
@@ -110,11 +100,10 @@ class CNNNet(nn.Module):
             global_conv_output = torch.flatten(global_conv_output, 1)
 
             # Concatenate tensors from outputs of two different convolutional columns?
-            ## What is format of local and global view tensors???
             conv_output = torch.cat((local_conv_output, global_conv_output), dim=1)
-
             h1 = F.relu(self.fc_in_both(conv_output))
 
+        # Fully connected linear layers regardless of view
         h2 = F.relu(self.fc_1(h1))
         h3 = F.relu(self.fc_2(h2))
         #h4 = F.relu(self.fc_3(h3))
@@ -122,8 +111,7 @@ class CNNNet(nn.Module):
 
         return y
 
-
-    # Feed Forward for convolutional column for local view
+    # Feed Forward for local view convolutional column
     def forward_conv_local(self, x):
         x = F.relu(self.conv_in_local(x))
         x = F.relu(self.conv_1_local(x))
@@ -134,7 +122,7 @@ class CNNNet(nn.Module):
         
         return x
 
-    # Feed Forward for convolutional column for global view
+    # Feed Forward for global view convolutional column
     def forward_conv_global(self, x):
         x = F.relu(self.conv_in_global(x))
         x = F.relu(self.conv_1_global(x))
@@ -154,7 +142,7 @@ class CNNNet(nn.Module):
         
         return x
 
-    # Reset parameters if using net more than once
+    # Reset parameters if training net more than once
     def reset(self):
         self.conv_in_local.reset_parameters()
         self.conv_1_local.reset_parameters()

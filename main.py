@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 from datetime import datetime
 
+# Custom libraries
 sys.path.append('src') 
 from load_data import dataPrep
 from cnn_net import CNNNet
@@ -23,6 +24,7 @@ if __name__ == '__main__':
     print("Start Time =", current_time)
     print()
     
+    # Command line arguments
     parser = argparse.ArgumentParser(description='Main file combining all three networks')
     parser.add_argument('--input', default=os.path.join('data', 'torch_data_ID'), type=str, help="location for input data files")
     parser.add_argument('--network', default='cnn', type=str, help="Neural network to be used. Default: cnn. Options: [ cnn | fc | linear ]")
@@ -71,22 +73,15 @@ if __name__ == '__main__':
 
     tuned_param = params['output']['tuned params']
 
-
+    # Generic name for output files
     res_file = '{}_{}_{}_{}'.format(network, view, user, tuned_param)
-
-    #run_path = params['output']['results path']
-    #run_ID = params['output']['results name']
-
-    # Create directory and files for TensorBoard
-    #tb_ID = run_path + run_ID
     for i in range(1, 5000):
-        cur_name = os.path.join(res_path, 'TensorBoard', network, view, '{}_{}'.format(res_file, str(i)))  #run_path + run_ID + '_{}_{}'.format(args.user, str(i))
+        cur_name = os.path.join(res_path, 'TensorBoard', network, view, '{}_{}'.format(res_file, str(i)))
         if not os.path.isdir(cur_name):
             res_file = '{}_{}'.format(res_file, str(i))
-            #tb_ID = cur_name
-            #out_file = run_ID + '_{}_{}'.format(args.user, str(i))
             break
-
+    
+    # Directory for TensorBoard
     tb_ID = os.path.join(res_path, 'TensorBoard', network, view, res_file)
     writer = SummaryWriter(tb_ID)
     print("Using TensorBoard ID: {}".format(tb_ID))
@@ -123,41 +118,35 @@ if __name__ == '__main__':
         model.train()
         train_loss_val = 0
         for batch_idx_train, (data_train, labels_train) in enumerate(train_loader):
-            optim.zero_grad()
-
-            # Get outputs and losses
+            # Get outputs and labels
             outputs_train = model(data_train)
-
-            label_train = labels_train[0]
-            #if len(labels_train) == 3:
-            #    kepid = labels_train[1]
-            #    tce_plnt_num = labels_train[2]
-            
+            label_train = labels_train[0]            
             label_train = label_train.to(device)
             label_train = label_train.view(-1, 1)
-            loss_train = loss_fn(outputs_train, label_train)
-            
+
+            # Backpropagate and get training loss
+            loss_train = loss_fn(outputs_train, label_train)            
+            optim.zero_grad()
             loss_train.backward()
             optim.step()
             train_loss_val += float(loss_train.item())
 
-        # Validate the model
+        # Validate the model with test dataset
         model.eval()
         test_loss_val = 0
         with torch.no_grad():
             for batch_idx_test, (data_test, labels_test) in enumerate(test_loader):
+                # Get outputs and labels
                 outputs_test = model(data_test)
-
                 label_test = labels_test[0]
-                #if len(labels_test) == 3:
-                #    kepid = labels_test[1]
-                #    tce_plnt_num = labels_test[2]
-
                 label_test = label_test.to(device)
                 label_test = label_test.view(-1, 1)
+
+                # Get testing loss
                 loss_test = loss_fn(outputs_test, label_test)
                 test_loss_val += float(loss_test.item())
 
+        # Obtain average loss per "data point"
         train_loss_avg = train_loss_val/len(train_set)
         test_loss_avg = test_loss_val/len(test_set)
         
