@@ -21,23 +21,22 @@ class CNNNet(nn.Module):
         ## Convolutional Columns
 
         # Only local view use these layers
-        self.conv_in_local = nn.Conv1d(1, 16, 5)  # (in channels, out channels, kernel size)
-
-        self.conv_1_local = nn.Conv1d(16, 16, 5)
-        self.conv_2_local = nn.Conv1d(16, 32, 5)         # Need "circle" padding to loop between sides and keep size of light curves the same
-        self.conv_3_local = nn.Conv1d(32, 32, 5)
+        self.conv_in_local = nn.Conv1d(1, 16, 5, padding='same')  # (in channels, out channels, kernel size)
+        self.conv_1_local = nn.Conv1d(16, 16, 5, padding='same')
+        self.conv_2_local = nn.Conv1d(16, 32, 5, padding='same')
+        self.conv_3_local = nn.Conv1d(32, 32, 5, padding='same')
 
         # Only global view uses these layers
-        self.conv_in_global = nn.Conv1d(1, 16, 5)
-        self.conv_1_global = nn.Conv1d(16, 16, 5)
-        self.conv_2_global = nn.Conv1d(16, 32, 5)
-        self.conv_3_global = nn.Conv1d(32, 32, 5)
-        self.conv_4_global = nn.Conv1d(32, 64, 5)
-        self.conv_5_global = nn.Conv1d(64, 64, 5)
-        self.conv_6_global = nn.Conv1d(64, 128, 5)
-        self.conv_7_global = nn.Conv1d(128, 128, 5)
-        self.conv_8_global = nn.Conv1d(128, 256, 5)
-        self.conv_9_global = nn.Conv1d(256, 256, 5)
+        self.conv_in_global = nn.Conv1d(1, 16, 5, padding='same')
+        self.conv_1_global = nn.Conv1d(16, 16, 5, padding='same')
+        self.conv_2_global = nn.Conv1d(16, 32, 5, padding='same')
+        self.conv_3_global = nn.Conv1d(32, 32, 5, padding='same')
+        self.conv_4_global = nn.Conv1d(32, 64, 5, padding='same')
+        self.conv_5_global = nn.Conv1d(64, 64, 5, padding='same')
+        self.conv_6_global = nn.Conv1d(64, 128, 5, padding='same')
+        self.conv_7_global = nn.Conv1d(128, 128, 5, padding='same')
+        self.conv_8_global = nn.Conv1d(128, 256, 5, padding='same')
+        self.conv_9_global = nn.Conv1d(256, 256, 5, padding='same')
 
 
         ## Maxpool layers
@@ -50,22 +49,22 @@ class CNNNet(nn.Module):
         ## Fully connected layers
         # Local view
         #self.fc_in_local = nn.Linear(32 * 5, 512, bias=True)  # output of conv1d is 32*5 ? --> only *5 once because 1d not 2d convolution?
-        self.fc_in_local = nn.Linear(1280, 512, bias=True)  # Where the heck does 1280 come from????
+        #self.fc_in_local = nn.Linear(1280, 512, bias=True)  # Where the heck does 1280 come from????
+        self.fc_in_local = nn.Linear(1472, 512, bias=True)  # Where the heck does 1280 come from????
 
         # Global view
         #self.fc_in_global = nn.Linear(256 * 5, 512, bias=True)  # output of conv1d is 256*5 ? --> only *5 once because 1d not 2d convolution?
-        self.fc_in_global = nn.Linear(13056, 512, bias=True)    # Where in the heck does 13056 come from!?!?!?!?!
+        #self.fc_in_global = nn.Linear(13056, 512, bias=True)    # Where in the heck does 13056 come from!?!?!?!?!
+        self.fc_in_global = nn.Linear(15104, 512, bias=True)    # Where in the heck does 13056 come from!?!?!?!?!
 
         # Both global and local view
-        self.fc_in_both = nn.Linear(1280 + 13056, 512, bias=True)  # output of conv1d is 32*5 + 256*5 ? --> only *5 once because 1d not 2d convolution?
+        #self.fc_in_both = nn.Linear(1280 + 13056, 512, bias=True)  # output of conv1d is 32*5 + 256*5 ? --> only *5 once because 1d not 2d convolution?
+        self.fc_in_both = nn.Linear(1472 + 15104, 512, bias=True)
 
-        ## Don't understand: First linear FC layer can't take in both local and global views the same way, since the outputs of the last convolutional
-        ## layers in each "column" are of different sizes (32*5 for local, 256*5 for global)
-        ## Are outputs of two convolutional columns concatenated (as in linear network)??
-
+        # FC layers for all views
         self.fc_1 = nn.Linear(512, 512, bias=True)
         self.fc_2 = nn.Linear(512, 512 , bias=True)
-        self.fc_3 = nn.Linear(512, 512, bias=True)
+        #self.fc_3 = nn.Linear(512, 512, bias=True)
         self.fc_out = nn.Linear(512, 1, bias=True)
 
 
@@ -76,7 +75,6 @@ class CNNNet(nn.Module):
         x : data input of batch size by 2201
         '''
         x = x.to(self.device)
-        # DOUBLE CHECK SLICING (upper limit is exclusive so only goes up to 200 and 2200)
         x_local = x[:, :201]
         x_global = x[:, 201:]
 
@@ -119,8 +117,8 @@ class CNNNet(nn.Module):
 
         h2 = F.relu(self.fc_1(h1))
         h3 = F.relu(self.fc_2(h2))
-        h4 = F.relu(self.fc_3(h3))
-        y = torch.sigmoid(self.fc_out(h4))
+        #h4 = F.relu(self.fc_3(h3))
+        y = torch.sigmoid(self.fc_out(h3))
 
         return y
 
@@ -179,5 +177,5 @@ class CNNNet(nn.Module):
         self.fc_in_both.reset_parameters()
         self.fc_1.reset_parameters()
         self.fc_2.reset_parameters()
-        self.fc_3.reset_parameters()
+        #self.fc_3.reset_parameters()
         self.fc_out.reset_parameters()

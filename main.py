@@ -242,6 +242,7 @@ if __name__ == '__main__':
 
 
     # Perform testing
+    # If more than 1 batch, append values to lists/arrays inside loop, then do saving outside loop
     model.eval()
     with torch.no_grad():
         # Create heatmap
