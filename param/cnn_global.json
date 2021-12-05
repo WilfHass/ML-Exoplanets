@@ -1,0 +1,21 @@
+{
+	"optim":{
+		"learning rate": 1e-5,
+		"beta 1": 0.9,
+		"beta 2": 0.999,
+		"epsilon": 1e-8,
+		"amsgrad": 0,
+		"weight decay": 0.0
+	},
+	"training":{
+		"num epochs": 5,
+		"batch size": 64
+	},
+	"testing":{
+		"batch size": 787
+	},
+	"output":{
+		"results path": "./runs/runs_cnn/",
+		"results name": "global_test"
+	}
+}
