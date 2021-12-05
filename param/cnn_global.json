@@ -15,7 +15,6 @@
 		"batch size": 787
 	},
 	"output":{
-		"results path": "./runs/runs_cnn/",
-		"results name": "global_test"
+		"tuned params" : "default"
 	}
 }

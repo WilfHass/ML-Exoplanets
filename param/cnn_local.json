@@ -8,14 +8,13 @@
 		"weight decay": 0.0
 	},
 	"training":{
-		"num epochs": 5,
+		"num epochs": 100,
 		"batch size": 64
 	},
 	"testing":{
 		"batch size": 787
 	},
 	"output":{
-		"results path": "./runs/runs_cnn/",
-		"results name": "local_test"
+		"tuned params" : "default"
 	}
 }
