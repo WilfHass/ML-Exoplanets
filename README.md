@@ -49,3 +49,14 @@ curves inserted along with their probability between
 0 and 1 of being a planet. The training and validation
 data should also include the correct labels for each
 light curve (planet/other).
+
+## Performance metrics
+To view the performance metrics after a run:
+```sh
+tensorboard --logdir=runs
+```
+
+To view the parameters of a specific architecture (ex cnn):
+```sh
+tensorboard --logdir=runs/runs_cnn
+```
