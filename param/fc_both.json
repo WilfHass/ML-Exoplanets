@@ -15,7 +15,6 @@
 		"batch size": 787
 	},
 	"output":{
-		"results path": "./runs/runs_fc/both/",
-		"results name": "both_test_d_0.5_2ly"
+		"tuned params" : "test"
 	}
 }

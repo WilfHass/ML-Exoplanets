@@ -15,8 +15,7 @@
 		"batch size": 787
 	},
 	"output":{
-		"results path": "./runs/runs_lin/local/",
-		"results name": "local_test"
+		"tuned params" : "test"
 	}
 }
 
