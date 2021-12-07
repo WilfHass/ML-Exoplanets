@@ -1,8 +1,3 @@
-
-
-
-
-
 ## This is the new(er) FC, no convolution
 
 import torch.nn as nn

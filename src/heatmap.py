@@ -22,7 +22,7 @@ def get_data(input_folder):
     return planet_view
     
 
-def create_heatmap(model,input_folder,view):
+def create_heatmap(model, input_folder, view):
     planet_tce = get_data(input_folder)
     
     # Randomly chose one of the spectra for the heat map (choosing a view)
@@ -35,7 +35,7 @@ def create_heatmap(model,input_folder,view):
         chosen_spectrum = planet_tce[index]
 
     #Creating a window that will move along the points and turn those points to zero
-    window = np.arange(-49,1,1)
+    window = np.arange(-49, 1, 1)
     ones = np.ones(50)
     
     windows = []
