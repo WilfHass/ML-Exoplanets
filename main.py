@@ -26,7 +26,7 @@ if __name__ == '__main__':
     parser.add_argument('--input', default=os.path.join('data/', 'torch_data_ID'), type=str, help="location for input data files")
     parser.add_argument('--network', default='cnn', type=str, help="Neural network to be used. Default: cnn. Options: [ cnn | fc | linear ]")
     parser.add_argument('--view', default='local', type=str, help="view of data (as described in paper): can be local, global or both; default: local")
-    parser.add_argument('--user', default='s', type=str, help="User currently running the data: should be changed everytime repo is pulled")
+    parser.add_argument('--user', default='w', type=str, help="User currently running the data: should be changed everytime repo is pulled")
     parser.add_argument('--param', type=str, help="location of parameter file. Default will use <network>_<view>.json")
     parser.add_argument('--result', default='results/', type=str, help="location of results")
     parser.add_argument('-v', default=1 , help="Verbosity (0 = no command line output, 1 = print training loss); default: 1")
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     elif network == "linear":
         model = LinNet(view, device).to(device)
     else:
-        print("Wrong Network Name. Only options are [ cnn | fc | lin ]")
+        print("Wrong Network Name. Only options are [ cnn | fc | linear ]")
         sys.exit(1)
 
     optim = torch.optim.Adam(model.parameters(), lr=lr, betas=(beta_l, beta_h), eps=epsilon, weight_decay=wd, amsgrad=amsgrad)
