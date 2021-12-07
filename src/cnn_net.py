@@ -46,12 +46,13 @@ class CNNNet(nn.Module):
         # Global view
         self.maxpool_global = nn.MaxPool1d(5, stride=2)
 
+
         ## Fully connected layers
         # Local view
-        self.fc_in_local = nn.Linear(1472, 512, bias=True)  # 1280?
+        self.fc_in_local = nn.Linear(1472, 512, bias=True)
 
         # Global view
-        self.fc_in_global = nn.Linear(15104, 512, bias=True)    # 13056?
+        self.fc_in_global = nn.Linear(15104, 512, bias=True)
 
         # Both global and local view
         self.fc_in_both = nn.Linear(1472 + 15104, 512, bias=True)
@@ -59,8 +60,10 @@ class CNNNet(nn.Module):
         # FC layers for all views
         self.fc_1 = nn.Linear(512, 512, bias=True)
         self.fc_2 = nn.Linear(512, 512 , bias=True)
-        #self.fc_3 = nn.Linear(512, 512, bias=True)
         self.fc_out = nn.Linear(512, 1, bias=True)
+
+        # Dropout regularization (not used for paper's best model)
+        self.dropout = nn.Dropout(0.3)
 
 
     # Feed forward
@@ -106,7 +109,6 @@ class CNNNet(nn.Module):
         # Fully connected linear layers regardless of view
         h2 = F.relu(self.fc_1(h1))
         h3 = F.relu(self.fc_2(h2))
-        #h4 = F.relu(self.fc_3(h3))
         y = torch.sigmoid(self.fc_out(h3))
 
         return y
@@ -165,5 +167,4 @@ class CNNNet(nn.Module):
         self.fc_in_both.reset_parameters()
         self.fc_1.reset_parameters()
         self.fc_2.reset_parameters()
-        #self.fc_3.reset_parameters()
         self.fc_out.reset_parameters()
