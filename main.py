@@ -168,6 +168,7 @@ if __name__ == '__main__':
                 test_loss_val += float(loss_test.item())
 
         # Obtain average loss per "data point"
+        # Need to divide by len(train/test_loader.dataset) instead?
         train_loss_avg = train_loss_val/len(train_set)
         test_loss_avg = test_loss_val/len(test_set)
         
