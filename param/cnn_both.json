@@ -2,20 +2,20 @@
 	"optim":{
 		"learning rate": 1e-3,
 		"beta 1": 0.9,
-		"beta 2": 0.999,
+		"beta 2": 0.99,
 		"epsilon": 1e-8,
 		"amsgrad": 0,
 		"weight decay": 0.0
 	},
 	"training":{
-		"num epochs": 50,
-		"batch size": 128
+		"num epochs": 35,
+		"batch size": 256
 	},
 	"testing":{
 		"batch size": 787
 	},
 	"output":{
-		"results path": "./runs/runs_cnn/",
+		"results path": "./runs/runs_cnn/both/",
 		"results name": "both_test"
 	}
 }

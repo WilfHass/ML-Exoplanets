@@ -1,6 +1,6 @@
 {
 	"optim":{
-		"learning rate": 5e-5,
+		"learning rate": 2e-4,
 		"beta 1": 0.9,
 		"beta 2": 0.99,
 		"epsilon": 1e-8,
@@ -8,7 +8,7 @@
 		"weight decay": 0.0
 	},
 	"training":{
-		"num epochs": 100,
+		"num epochs": 20,
 		"batch size": 256
 	},
 	"testing":{
@@ -16,6 +16,6 @@
 	},
 	"output":{
 		"results path": "./runs/runs_fc/global/",
-		"results name": "global_test"
+		"results name": "global_test_d_0.5"
 	}
 }

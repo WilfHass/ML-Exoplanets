@@ -8,8 +8,8 @@
 		"weight decay": 0.1
 	},
 	"training":{
-		"num epochs": 150,
-		"batch size": 256
+		"num epochs": 50,
+		"batch size": 128
 	},
 	"testing":{
 		"batch size": 787
