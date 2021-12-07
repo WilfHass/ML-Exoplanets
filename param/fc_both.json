@@ -1,14 +1,14 @@
 {
 	"optim":{
-		"learning rate": 1e-4,
-		"beta 1": 0.9,
+		"learning rate": 5e-5,
+		"beta 1": 0.85,
 		"beta 2": 0.99,
 		"epsilon": 1e-8,
 		"amsgrad": 0,
-		"weight decay": 0.00
+		"weight decay": 0.0
 	},
 	"training":{
-		"num epochs": 7,
+		"num epochs": 20,
 		"batch size": 64
 	},
 	"testing":{
@@ -16,6 +16,6 @@
 	},
 	"output":{
 		"results path": "./runs/runs_fc/both/",
-		"results name": "both_test_d_0.5"
+		"results name": "both_test_d_0.5_2ly"
 	}
 }

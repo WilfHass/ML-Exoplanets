@@ -9,27 +9,22 @@ class FCNet(nn.Module):
         size : size of data
         view : view of TCE data -> 'global' | 'local' | 'both'
         '''
-        super(FCNet,
-              self).__init__()  # super gives access to attributes in a superclass from the subclass that inherits from it
+        super(FCNet, self).__init__()  # super gives access to attributes in a superclass from the subclass that inherits from it
         self.view = view
         self.device = device
 
         if view == 'both':
             # Local view FC layers
-            self.a1 = nn.Linear(201, 400)
-            self.a2 = nn.Linear(400, 200)
-            self.a3 = nn.Linear(200, 100)
-            self.a4 = nn.Linear(100, 50)
+            self.a1 = nn.Linear(201, 100)
+            self.a2 = nn.Linear(100, 10)
 
             # Global view FC layers
-            self.b1 = nn.Linear(2001, 4000)
-            self.b2 = nn.Linear(4000, 1000)
-            self.b3 = nn.Linear(1000, 200)
-            self.b4 = nn.Linear(200, 50)
+            self.b1 = nn.Linear(2001, 200)
+            self.b2 = nn.Linear(200, 10)
 
             # Combined layers
-            self.c1 = nn.Linear(100, 20)
-            self.c2 = nn.Linear(20, 1)
+            self.c1 = nn.Linear(20, 10)
+            self.c2 = nn.Linear(10, 1)
 
         elif view == 'local':
             self.fca1 = nn.Linear(201, 400)
@@ -65,17 +60,13 @@ class FCNet(nn.Module):
             # Local View
             d1 = torch.relu(self.a1(local_data))
             d2 = torch.relu(self.a2(self.dropout(d1)))
-            d3 = torch.relu(self.a3(self.dropout(d2)))
-            d4 = torch.relu(self.a4(self.dropout(d3)))
 
             # Global View
             e1 = torch.relu(self.b1(global_data))
             e2 = torch.relu(self.b2(self.dropout(e1)))
-            e3 = torch.relu(self.b3(self.dropout(e2)))
-            e4 = torch.relu(self.b4(self.dropout(e3)))
 
             # Combine Views
-            combine = torch.cat((d4, e4), 1)
+            combine = torch.cat((d2, e2), 1)
             g1 = torch.relu(self.c1(combine))
 
             y = torch.sigmoid(self.c2(g1))
@@ -99,4 +90,3 @@ class FCNet(nn.Module):
             y = torch.sigmoid(self.fcb6(b5))
 
         return y
-
