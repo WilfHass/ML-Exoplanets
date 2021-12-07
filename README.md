@@ -22,7 +22,7 @@ The [README](https://github.com/cshallue/exoplanet-ml/tree/master/exoplanet-ml/a
 To run `main.py` with any variation:
 
 ```sh
-python main.py --input [data-path] --network [cnn | fc | linear] --view [local | global | both] --user [user] --param [network]_[view].json --result results/ -v [0 | 1]
+python main.py --input [data-path] --network [cnn | fc | linear] --view [local | global | both] --user [user] --param [network]_[view].json --result results -v [0 | 1]
 ```
 
 **Remember to set the user *everytime* you pull the repo** 

@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 from datetime import datetime
 
+# Custom libraries
 sys.path.append('src') 
 from load_data import dataPrep
 from cnn_net import CNNNet
@@ -21,14 +22,16 @@ if __name__ == '__main__':
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     print("Start Time =", current_time)
+    print()
     
+    # Command line arguments
     parser = argparse.ArgumentParser(description='Main file combining all three networks')
-    parser.add_argument('--input', default=os.path.join('data/', 'torch_data_ID'), type=str, help="location for input data files")
+    parser.add_argument('--input', default=os.path.join('data', 'torch_data_ID'), type=str, help="location for input data files")
     parser.add_argument('--network', default='cnn', type=str, help="Neural network to be used. Default: cnn. Options: [ cnn | fc | linear ]")
     parser.add_argument('--view', default='local', type=str, help="view of data (as described in paper): can be local, global or both; default: local")
     parser.add_argument('--user', default='w', type=str, help="User currently running the data: should be changed everytime repo is pulled")
     parser.add_argument('--param', type=str, help="location of parameter file. Default will use <network>_<view>.json")
-    parser.add_argument('--result', default='results/', type=str, help="location of results")
+    parser.add_argument('--result', default='results', type=str, help="location of results")
     parser.add_argument('-v', default=1 , help="Verbosity (0 = no command line output, 1 = print training loss); default: 1")
     args = parser.parse_args()
 
@@ -38,17 +41,20 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         view = args.view
-    
-    if args.param is None:
-        param_file = args.network + "_" + args.view + ".json"
-        print(param_file)
-    else:
-        param_file = args.param
 
-    network = args.network
+    # Get all command line inputs
     input_folder = args.input
+    network = args.network
+    user = args.user
     res_path = args.result
     verbosity = args.v
+
+    # Get json parameter file
+    if args.param is None:
+        param_file = args.network + "_" + args.view + ".json"
+    else:
+        param_file = args.param
+    print("Using json parameter file: {}".format(param_file))
 
     # Get parameters from json parameter file    
     with open(os.path.join('param', param_file)) as paramfile:
@@ -65,20 +71,21 @@ if __name__ == '__main__':
     trainbs = params['training']['batch size']
     testbs = params['testing']['batch size']
 
-    run_path = params['output']['results path']
-    run_ID = params['output']['results name']
+    tuned_param = params['output']['tuned params']
 
-    # Create directory and files for TensorBoard
-    tb_ID = run_path + run_ID
+    # Generic name for output files
+    res_file = '{}_{}_{}_{}'.format(network, view, user, tuned_param)
     for i in range(1, 5000):
-        cur_name = (run_path + run_ID + '_{}_{}'.format(args.user, str(i)))
+        cur_name = os.path.join(res_path, 'TensorBoard', network, view, '{}_{}'.format(res_file, str(i)))
         if not os.path.isdir(cur_name):
-            tb_ID = cur_name
-            out_file = run_ID + '_{}'.format(str(i)) + '.png'
+            res_file = '{}_{}'.format(res_file, str(i))
             break
-
-    print(tb_ID)
+    
+    # Directory for TensorBoard
+    tb_ID = os.path.join(res_path, 'TensorBoard', network, view, res_file)
     writer = SummaryWriter(tb_ID)
+    print("Using TensorBoard ID: {}".format(tb_ID))
+    print()
 
     # Training and Testing data
     train_loader, test_loader = dataPrep(input_folder, trainbs, testbs)
@@ -99,33 +106,32 @@ if __name__ == '__main__':
         print("Wrong Network Name. Only options are [ cnn | fc | linear ]")
         sys.exit(1)
 
+    # Optimizer and loss function
     optim = torch.optim.Adam(model.parameters(), lr=lr, betas=(beta_l, beta_h), eps=epsilon, weight_decay=wd, amsgrad=amsgrad)
     loss_fn = torch.nn.BCELoss()
 
+    # Training and testing loop
+    print("Training...")
     for e in range(num_epochs):
         
         # Train the model
         model.train()
         train_loss_val = 0
         for batch_idx_train, (data_train, labels_train) in enumerate(train_loader):
-            optim.zero_grad()
-
-            # Get outputs and losses
+            # Get outputs and labels
             outputs_train = model(data_train)
-            ## No longer takes in un ID'd data. Must use new data.
-            label_train = labels_train[0]
-            kepid = labels_train[1]
-            tce_plnt_num = labels_train[2]
-            
+            label_train = labels_train[0]            
             label_train = label_train.to(device)
             label_train = label_train.view(-1, 1)
-            loss_train = loss_fn(outputs_train, label_train)
-            
+
+            # Backpropagate and get training loss
+            loss_train = loss_fn(outputs_train, label_train)            
+            optim.zero_grad()
             loss_train.backward()
             optim.step()
             train_loss_val += float(loss_train.item())
 
-        # Validate the model
+        # Validate the model with test dataset
         model.eval()
         test_loss_val = 0
 
@@ -137,6 +143,7 @@ if __name__ == '__main__':
 
         with torch.no_grad():
             for batch_idx_test, (data_test, labels_test) in enumerate(test_loader):
+                # Get outputs and labels
                 outputs_test = model(data_test)
                 label_test = labels_test[0]
 
@@ -155,17 +162,20 @@ if __name__ == '__main__':
 
                 label_test = label_test.to(device)
                 label_test = label_test.view(-1, 1)
+
+                # Get testing loss
                 loss_test = loss_fn(outputs_test, label_test)
                 test_loss_val += float(loss_test.item())
 
-        train_loss_avg = train_loss_val / len(train_set)
-        test_loss_avg = test_loss_val / len(test_set)
+        # Obtain average loss per "data point"
+        train_loss_avg = train_loss_val/len(train_set)
+        test_loss_avg = test_loss_val/len(test_set)
         
         # Obtain performance metrics for testing
         perf_list_train = performance(model, train_set)
         perf_list_test = performance(model, test_set)
 
-        # Print training loss
+        # Print training and test loss
         if verbosity and e % 1 == 0:
             print("Epoch [{}/{}] \t Train Loss: {} \t Test Loss: {} \t Test accuracy: {} \t Test precision: {}".format(
                 e+1,
@@ -257,19 +267,43 @@ if __name__ == '__main__':
 
     print("Finished")
 
-    # Create heatmap
-    #optimize(cnn_net, train_batchlists, params)
-    #test_set = list(test_loader)
-    # create_heatmap(model, input_folder, view)
+
+    # Perform testing
+    if verbosity:
+        model.eval()
+        with torch.no_grad():
+            # Create heatmap
+            create_heatmap(model, input_folder, view, os.path.join(res_path, 'plots', network, view, 'heatmap_' + res_file + '.png'))
 
 
-    # Plot precision-recall plot
-    # model.eval()
-    # with torch.no_grad():
-    #     for batch_idx, (data, labels) in enumerate(test_loader):
+            # Save outputs and plot
+            output = torch.zeros([len(test_loader.dataset), 4], dtype=torch.float32)
+            counter = 0
 
-    #         outputs = model(data)
-    #         # np.savetxt(os.path.join(res_path, 'precision_recall_' + out_file + '.csv'), outputs, delimiter=',')
-    #         # torch.save(outputs, os.path.join(res_path, 'precision_recall_' + out_file + '.pt'))
-    #         label = labels[0].view(-1, 1) # torch.reshape(label_test, (len(label_test), -1))
-    #         # compare_thresholds(outputs, label, 'precision_recall_' + out_file)
+            for batch_idx_test, (data_test, labels_test) in enumerate(test_loader):
+                outputs_test = model(data_test)
+
+                label_test = labels_test[0]
+                label_test = label_test.view(-1, 1)
+
+                kepid = labels_test[1]
+                kepid = kepid.view(-1, 1)
+
+                tce_plnt_num = labels_test[2]
+                tce_plnt_num = tce_plnt_num.view(-1, 1)
+
+                output[counter:counter+data_test.shape[0], 0] = kepid[:,0]
+                output[counter:counter+data_test.shape[0], 1] = tce_plnt_num[:,0]
+                output[counter:counter+data_test.shape[0], 2] = label_test[:,0]
+                output[counter:counter+data_test.shape[0], 3] = outputs_test[:,0]
+                #output = torch.stack((kepid, tce_plnt_num, label_test, outputs_test), dim=1)
+
+                counter += data_test.shape[0]
+
+            # Save testing probabilities for light curves
+            header = 'kepid, tce_plnt_num, true_label, out_label'
+            np.savetxt(os.path.join(res_path, 'testing_probabilities', network, view, res_file + '.csv'), output, delimiter=',', header=header)
+            torch.save(output, os.path.join(res_path, 'testing_probabilities', network, view, res_file + '.pt'))
+
+            # Plot precision-recall plot
+            compare_thresholds(output[:,3], output[:,2], os.path.join(res_path, 'plots', network, view, 'precision_recall_' + res_file + '.png'))

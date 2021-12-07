@@ -8,14 +8,13 @@
 		"weight decay": 0.0
 	},
 	"training":{
-		"num epochs": 5,
+		"num epochs": 50,
 		"batch size": 64
 	},
 	"testing":{
 		"batch size": 787
 	},
 	"output":{
-		"results path": "./runs/runs_cnn/local/",
-		"results name": "local_test"
+		"tuned params" : "lr_1e-3_bs_64_beta1_0.999_50_epochs"
 	}
 }
