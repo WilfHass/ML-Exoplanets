@@ -46,6 +46,3 @@ and the planet number for the star.
 To run convert_torch_ID.py:
 python convert_torch_ID.py --inputs "TFTensors" --outputs "TorchTensors_ID"
 - Change the name of each datafile when running. Needs to be run once for each TFTensor file. 
-
-
-

@@ -1,4 +1,3 @@
-## PHYS 449 ML project:
 ## Convert TFRecords used in paper to Torch format
 
 ## to understand TFRecords, read:
@@ -22,8 +21,6 @@ output_loc = str(args.output)
 
 filename_in = args.input + "/val-00000-of-00001"
 filename_out = args.output + "/val-00000-of-00001_ID"
-
-
 
 ## Do not add the .tfrecord extension at the end of the filenames! They have no extension
 dataset = tf.data.TFRecordDataset(filename_in)
@@ -77,38 +74,3 @@ tensor = torch.from_numpy(np_array)
 
 print(tensor)
 torch.save(tensor, filename_out)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
