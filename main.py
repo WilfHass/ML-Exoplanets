@@ -263,6 +263,36 @@ if __name__ == '__main__':
     #test_set = list(test_loader)
     # create_heatmap(cnn_net, input_folder, view)
 
+    # Perform testing
+    if verbosity:
+        model.eval()
+        with torch.no_grad():
+            # Create heatmap
+            create_heatmap(model, input_folder, view, os.path.join(res_path, 'plots', network, view, 'heatmap_' + res_file + '.png'))
+
+            # Save outputs and plot
+            output = torch.zeros([len(test_loader.dataset), 4], dtype=torch.float32)
+            counter = 0
+
+            for batch_idx_test, (data_test, labels_test) in enumerate(test_loader):
+                outputs_test = model(data_test)
+
+                label_test = labels_test[0]
+                label_test = label_test.view(-1, 1)
+
+                kepid = labels_test[1]
+                kepid = kepid.view(-1, 1)
+
+                tce_plnt_num = labels_test[2]
+                tce_plnt_num = tce_plnt_num.view(-1, 1)
+
+                output[counter:counter+data_test.shape[0], 0] = kepid[:,0]
+                output[counter:counter+data_test.shape[0], 1] = tce_plnt_num[:,0]
+                output[counter:counter+data_test.shape[0], 2] = label_test[:,0]
+                output[counter:counter+data_test.shape[0], 3] = outputs_test[:,0]
+                #output = torch.stack((kepid, tce_plnt_num, label_test, outputs_test), dim=1)
+
+                counter += data_test.shape[0]
 
     # Plot precision-recall plot
     model.eval()
