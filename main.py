@@ -275,7 +275,6 @@ if __name__ == '__main__':
             # Create heatmap
             create_heatmap(model, input_folder, view, os.path.join(res_path, 'plots', network, view, 'heatmap_' + res_file + '.png'))
 
-
             # Save outputs and plot
             output = torch.zeros([len(test_loader.dataset), 4], dtype=torch.float32)
             counter = 0
