@@ -15,7 +15,7 @@
 		"batch size": 787
 	},
 	"output":{
-		"results path": "./runs/runs_cnn/",
+		"results path": "./runs/runs_cnn/global/",
 		"results name": "global_test"
 	}
 }

@@ -1,21 +1,22 @@
 {
 	"optim":{
-		"learning rate": 2e-2,
+		"learning rate": 1e-3,
 		"beta 1": 0.9,
-		"beta 2": 0.999,
+		"beta 2": 0.99,
 		"epsilon": 1e-8,
 		"amsgrad": 0,
 		"weight decay": 0.0
 	},
 	"training":{
-		"num epochs": 5,
-		"batch size": 256
+		"num epochs": 200,
+		"batch size": 64
 	},
 	"testing":{
 		"batch size": 787
 	},
 	"output":{
-		"results path": "./runs/runs_lin/",
+		"results path": "./runs/runs_lin/local/",
 		"results name": "local_test"
 	}
 }
+
