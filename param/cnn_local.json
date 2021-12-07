@@ -15,6 +15,6 @@
 		"batch size": 787
 	},
 	"output":{
-		"tuned params" : "lr_1e-5_bs_64_wd_0.1_50_epochs"
+		"tuned params" : "lr_1e-3_bs_64_beta1_0.999_50_epochs"
 	}
 }
