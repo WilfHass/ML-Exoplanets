@@ -210,7 +210,6 @@ if __name__ == '__main__':
     #optimize(fc_net, train_batchlists, params)
 
     # Print final performance metrics
-    # [acc, prec, rec, AUC]
     print("Training:")
     print("acc: {} \t prec: {} \t rec: {} \t AUC: {}".format(perf_list_train[0], perf_list_train[1], perf_list_train[2], perf_list_train[3]))
     print()
@@ -228,16 +227,16 @@ if __name__ == '__main__':
     # Create heatmap
     #optimize(cnn_net, train_batchlists, params)
     #test_set = list(test_loader)
-    # create_heatmap(cnn_net, input_folder, view)
+    # create_heatmap(model, input_folder, view)
 
 
     # Plot precision-recall plot
-    model.eval()
-    with torch.no_grad():
-        for batch_idx, (data, labels) in enumerate(test_loader):
+    # model.eval()
+    # with torch.no_grad():
+    #     for batch_idx, (data, labels) in enumerate(test_loader):
 
-            outputs = model(data)
-            # np.savetxt(os.path.join(res_path, 'precision_recall_' + out_file + '.csv'), outputs, delimiter=',')
-            # torch.save(outputs, os.path.join(res_path, 'precision_recall_' + out_file + '.pt'))
-            label = labels[0].view(-1, 1) # torch.reshape(label_test, (len(label_test), -1))
-            # compare_thresholds(outputs, label, 'precision_recall_' + out_file)
+    #         outputs = model(data)
+    #         # np.savetxt(os.path.join(res_path, 'precision_recall_' + out_file + '.csv'), outputs, delimiter=',')
+    #         # torch.save(outputs, os.path.join(res_path, 'precision_recall_' + out_file + '.pt'))
+    #         label = labels[0].view(-1, 1) # torch.reshape(label_test, (len(label_test), -1))
+    #         # compare_thresholds(outputs, label, 'precision_recall_' + out_file)

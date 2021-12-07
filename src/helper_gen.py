@@ -1,26 +1,8 @@
-import argparse
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import roc_auc_score
 import torch
-
-def make_parser():
-    parser = argparse.ArgumentParser(description='Exoplanet detection CNN: Local or global data only')
-    parser.add_argument('--view', type=str, default = 'local', help="Input: 'local' | 'global' | 'both'")
-    parser.add_argument('--param', type=str, default="param/fc_params_local.json", help="file name for json attributes.")
-    parser.add_argument('--input', type=str, default='../data/torch_data', help='location of folder for data')
-    parser.add_argument('--result', type=str, default='results/output1.txt',help='filename to save the test outputs at')
-
-    args = parser.parse_args()
-
-    if not os.path.exists('plots'):
-        os.makedirs('plots')
-
-    if not os.path.exists('results'):
-        os.makedirs('results')
-
-    return args
 
 
 def precision(outputs,labels): 
