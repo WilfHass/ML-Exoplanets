@@ -15,6 +15,6 @@
 		"batch size": 787
 	},
 	"output":{
-		"tuned params" : "test"
+		"tuned params" : "lr_1e-5_bs_64_50_epochs"
 	}
 }
