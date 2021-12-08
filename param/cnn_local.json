@@ -8,13 +8,13 @@
 		"weight decay": 0.0
 	},
 	"training":{
-		"num epochs": 1,
+		"num epochs": 2,
 		"batch size": 64
 	},
 	"testing":{
 		"batch size": 787
 	},
 	"output":{
-		"tuned params" : "lr_1e-5_bs_64_50_epochs"
+		"tuned params" : "end_test"
 	}
 }
