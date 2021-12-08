@@ -9,7 +9,7 @@ from load_data import dataPrep
 from cnn_net import CNNNet
 from fc_net import FCNet
 from linear_net import LinNet
-from helper_gen import compare_thresholds, performance
+from helper import compare_thresholds, performance
 from heatmap import *
 
 from torch.utils.tensorboard import SummaryWriter
