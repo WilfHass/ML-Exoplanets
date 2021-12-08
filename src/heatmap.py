@@ -28,7 +28,7 @@ def get_planets(input_folder):
     
 
 def create_heatmap(model, input_folder,view, filename):
-    planet_tce = get_data(input_folder)
+    planet_tce = get_planets(input_folder)
     
     # Index =1 is for planet, Index=0 is for binaries
     index = 1

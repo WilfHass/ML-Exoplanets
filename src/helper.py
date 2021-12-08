@@ -1,7 +1,22 @@
 import matplotlib.pyplot as plt
+import os
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
+def createDirs(results_dir):
+    '''Creates the directories necessary in case any results dirs don't exist
+    results_dir : results directory
+    '''
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    
+    for dir in ['plots', 'TensorBoard', 'testing_probabilities'] :
+        for arc in ['cnn', 'fc', 'linear']:
+            for view in ['both', 'global', 'local']:
+
+                path = os.path.join(results_dir, dir, arc, view)
+                if not os.path.exists(path):
+                    os.makedirs(path)
 
 def precision(outputs, labels): 
     '''

@@ -63,10 +63,11 @@ CSV and pt (PyTorch tensor) files with Kepler IDs, planet numbers, labels and pr
 ## Performance metrics
 To view the performance metrics after a run:
 ```sh
-tensorboard --logdir=runs
+tensorboard --logdir=results/TensorBoard
 ```
 
 To view the parameters of a specific architecture (ex cnn):
+
 ```sh
-tensorboard --logdir=runs/runs_cnn
+tensorboard --logdir=results/TensorBoard/<architecture>/<view>
 ```

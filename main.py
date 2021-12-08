@@ -9,7 +9,7 @@ from load_data import dataPrep
 from cnn_net import CNNNet
 from fc_net import FCNet
 from linear_net import LinNet
-from helper import compare_thresholds, performance
+from helper import compare_thresholds, performance, createDirs
 from heatmap import *
 from plotbestworst import *
 
@@ -55,6 +55,9 @@ if __name__ == '__main__':
     res_path = args.result
     verbosity = args.v
 
+    # Create the output directories
+    createDirs(res_path)
+    
     if args.param is None:
         param_file = args.network + "_" + args.view + ".json"
     else:
