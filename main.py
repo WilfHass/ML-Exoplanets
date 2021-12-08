@@ -17,12 +17,14 @@ from torch.utils.tensorboard import SummaryWriter
 pwd = os.getcwd()
         
 if __name__ == '__main__':
+    
     # Print start time
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     print("Start Time =", current_time)
     print()
     
+    # Command line arguments
     parser = argparse.ArgumentParser(description='Main file combining all three networks')
     parser.add_argument('--input', default=os.path.join('data', 'torch_data_ID'), type=str, help="location for input data files")
     parser.add_argument('--network', default='cnn', type=str, help="Neural network to be used. Default: cnn. Options: [ cnn | fc | linear ]")
@@ -40,6 +42,7 @@ if __name__ == '__main__':
     else:
         view = args.view
     
+    # Get the hyper-parameter file
     if args.param is None:
         param_file = args.network + "_" + args.view + ".json"
     else:
@@ -241,12 +244,8 @@ if __name__ == '__main__':
 
     writer.add_hparams(tf_params, tf_metric)
     writer.close()
-    # To open tensorboard, run in terminal:
-    # tensorboard --logdir=runs
-    #optimize(fc_net, train_batchlists, params)
 
     # Print final performance metrics
-    # [acc, prec, rec, AUC]
     print("Training:")
     print("acc: {} \t prec: {} \t rec: {} \t AUC: {}".format(perf_list_train[0], perf_list_train[1], perf_list_train[2], perf_list_train[3]))
     print()
@@ -257,6 +256,7 @@ if __name__ == '__main__':
     # Find difference between predictions and labels
     listof_diff = list(np.absolute(np.array(listof_preds) - np.array(listof_labels)))
     IDs = np.transpose(np.array([listof_kepids, listof_tce_plnt_num, listof_labels, listof_preds, listof_diff]))
+
     # Sort list of IDs by magnitude of prediction error
     IDs = IDs[IDs[:, 4].argsort()]
 

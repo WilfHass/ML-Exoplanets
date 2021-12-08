@@ -12,15 +12,15 @@ import torch
 sys.path.append('TFTensors')
 
 parser = argparse.ArgumentParser(description='Convert TFTensor to numpy array')
-parser.add_argument('--input', default="TFTensors", help='path to TFTensors directory')
-parser.add_argument('--output', default="TorchTensors_ID", type=str, help="path to TorchTensors directory")
+parser.add_argument('--input', default="TFTensors/val-00000-of-00001", help='path to TFTensors directory')
+parser.add_argument('--output', default="TorchTensors_ID/val-00000-of-00001_ID", type=str, help="path to TorchTensors directory")
 args = parser.parse_args()
 
 input_loc = str(args.input)
 output_loc = str(args.output)
 
-filename_in = args.input + "/val-00000-of-00001"
-filename_out = args.output + "/val-00000-of-00001_ID"
+filename_in = args.input 
+filename_out = args.output
 
 ## Do not add the .tfrecord extension at the end of the filenames! They have no extension
 dataset = tf.data.TFRecordDataset(filename_in)
