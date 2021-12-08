@@ -15,6 +15,6 @@
 		"batch size": 787
 	},
 	"output":{
-		"tuned params" : "end_test"
+		"tuned params" : "test"
 	}
 }

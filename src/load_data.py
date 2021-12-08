@@ -7,7 +7,8 @@ from torch.utils.data import DataLoader
 pwd = os.getcwd()
 
 def getData(input_folder):
-    '''getData turns the pytorch tensor files into a concatenated tensor
+    '''
+    getData turns the pytorch tensor files into a concatenated tensor
     input_folder : path to input data folder
     '''
     train_data = torch.tensor([])

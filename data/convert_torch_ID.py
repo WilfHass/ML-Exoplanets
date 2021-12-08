@@ -1,7 +1,5 @@
 ## Convert TFRecords used in paper to Torch format
 
-## to understand TFRecords, read:
-# https://towardsdatascience.com/a-practical-guide-to-tfrecords-584536bc786c
 
 import numpy as np
 import sys
@@ -13,7 +11,7 @@ sys.path.append('TFTensors')
 
 parser = argparse.ArgumentParser(description='Convert TFTensor to numpy array')
 parser.add_argument('--input', default="TFTensors/val-00000-of-00001", help='path to TFTensors directory')
-parser.add_argument('--output', default="TorchTensors_ID/val-00000-of-00001_ID", type=str, help="path to TorchTensors directory")
+parser.add_argument('--output', default="torch_data_ID/val-00000-of-00001_ID", type=str, help="path to TorchTensors directory")
 args = parser.parse_args()
 
 input_loc = str(args.input)
@@ -22,7 +20,7 @@ output_loc = str(args.output)
 filename_in = args.input 
 filename_out = args.output
 
-## Do not add the .tfrecord extension at the end of the filenames! They have no extension
+## Do not add the .tfrecord extension at the end of the TFRecords
 dataset = tf.data.TFRecordDataset(filename_in)
 
 # description of the features. Found out the hard way.
@@ -48,7 +46,6 @@ def parse_function(example_proto):
     return tf.io.parse_single_example(example_proto, feature_description)
 
 parsed_dataset = dataset.map(parse_function)
-print(len(list(parsed_dataset)))
 
 num_samples = len(list(parsed_dataset))
 
@@ -67,10 +64,7 @@ for parsed_record in parsed_dataset.take(num_samples):
 
     array.append(local_list + global_list + [label, kepid, tce_plnt_num])
 
-print([label, kepid, tce_plnt_num])
 
 np_array = np.array(array, dtype='float32')
 tensor = torch.from_numpy(np_array)
-
-print(tensor)
 torch.save(tensor, filename_out)

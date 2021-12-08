@@ -29,7 +29,7 @@ if __name__ == '__main__':
     parser.add_argument('--input', default=os.path.join('data', 'torch_data_ID'), type=str, help="location for input data files")
     parser.add_argument('--network', default='cnn', type=str, help="Neural network to be used. Default: cnn. Options: [ cnn | fc | linear ]")
     parser.add_argument('--view', default='local', type=str, help="view of data (as described in paper): can be local, global or both; default: local")
-    parser.add_argument('--user', default='w', type=str, help="User currently running the data: should be changed everytime repo is pulled")
+    parser.add_argument('--user', default='s', type=str, help="User currently running the data: should be changed everytime repo is pulled")
     parser.add_argument('--param', type=str, help="location of parameter file. Default will use <network>_<view>.json")
     parser.add_argument('--result', default='results', type=str, help="location of results")
     parser.add_argument('-v', default=1 , help="Verbosity (0 = no command line output, 1 = print training loss); default: 1")
@@ -176,7 +176,7 @@ if __name__ == '__main__':
                 loss_test = loss_fn(outputs_test, label_test)
                 test_loss_val += float(loss_test.item())
 
-        # Obtrain average loss per "data point"
+        # Obtain average loss per "data point"
         train_loss_avg = train_loss_val / len(train_set)
         test_loss_avg = test_loss_val / len(test_set)
         
@@ -238,19 +238,25 @@ if __name__ == '__main__':
     }
 
     print()
-    print("TensorBoard Params:")
-    print(tf_params)
-    print()
 
     writer.add_hparams(tf_params, tf_metric)
     writer.close()
 
     # Print final performance metrics
     print("Training:")
-    print("acc: {} \t prec: {} \t rec: {} \t AUC: {}".format(perf_list_train[0], perf_list_train[1], perf_list_train[2], perf_list_train[3]))
+    print("acc: {} \t prec: {} \t rec: {} \t AUC: {}".format(
+        round(perf_list_train[0], 3),
+        round(perf_list_train[1], 3),
+        round(perf_list_train[2], 3),
+        round(perf_list_train[3], 3)))
     print()
+
     print("Testing:")
-    print("acc: {} \t prec: {} \t rec: {} \t AUC: {}".format(perf_list_test[0], perf_list_test[1], perf_list_test[2], perf_list_test[3]))
+    print("acc: {} \t prec: {} \t rec: {} \t AUC: {}".format(
+        round(perf_list_test[0], 3),
+        round(perf_list_test[1], 3),
+        round(perf_list_test[2], 3),
+        round(perf_list_test[3], 3)))
     print()
 
     # Find difference between predictions and labels
@@ -259,24 +265,39 @@ if __name__ == '__main__':
 
     # Sort list of IDs by magnitude of prediction error
     IDs = IDs[IDs[:, 4].argsort()]
-
     # Format: [kepid, tce_plnt_num, label, prediction, difference]
-    # Print 5 best predictions; first rows in the array
+
     if verbosity:
+        best_5 = list(IDs[:5, :])
+        worst_5 = list(IDs[-5:, :])
+
+        # Print 5 best predictions; first rows in the array
         print("5 best predictions:")
-        print(IDs[:5, :])
+        for pc in best_5:
+            print("kepid: {} \t tce_plnt_num: {} \t label: {} \t prediction: {} \t difference: {}".format(
+                int(pc[0]),
+                int(pc[1]),
+                int(pc[2]),
+                round(pc[3], 3),
+                round(pc[4], 3)))
         print()
+
         # Print 5 worst predictions; last rows in the array
         print("5 worst predictions:")
-        print(IDs[-5:, :])
+        for pc in worst_5:
+            print("kepid: {} \t tce_plnt_num: {} \t label: {} \t prediction: {} \t difference: {}".format(
+                int(pc[0]),
+                int(pc[1]),
+                int(pc[2]),
+                round(pc[3], 3),
+                round(pc[4], 3)))
         print()
-
 
     # Print end time
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     print("End Time =", current_time)
-    print("Finished")
+
 
     # Perform testing
     if verbosity:
@@ -318,3 +339,10 @@ if __name__ == '__main__':
 
             # Plot precision-recall plot
             compare_thresholds(output[:,3], output[:,2], os.path.join(res_path, 'plots', network, view, 'precision_recall_' + res_file + '.png'))
+
+    print("Finished")
+
+    # To open the runs for this model and view in TensorBoard:
+    tb_dir = res_path + '/TensorBoard/' + network +  "/" + view + "/"
+    print("To open run data for the current model and view in TensorBoard, run in terminal:")
+    print("tensorboard --logdir=" + tb_dir)

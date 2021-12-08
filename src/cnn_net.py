@@ -9,6 +9,7 @@ class CNNNet(nn.Module):
         view : view of TCE data -> 'global' | 'local' | 'both'
         device : 'cuda' or 'cpu'
         '''
+
         super(CNNNet, self).__init__()
 
         self.view = view
@@ -66,8 +67,7 @@ class CNNNet(nn.Module):
     # Feed forward
     def forward(self, x):
         '''
-        Feed forward propogation
-        x : data input of batch size by 2201
+        x : data input of size (batch size, 2201)
         '''
 
         # Get local and global view TCEs
@@ -110,8 +110,11 @@ class CNNNet(nn.Module):
 
         return y
 
-    # Feed Forward for local view convolutional column
     def forward_conv_local(self, x):
+        '''
+        Feed Forward for local view convolutional column
+        '''
+
         x = F.relu(self.conv_in_local(x))
         x = F.relu(self.conv_1_local(x))
         x = self.maxpool_local(x)             
@@ -121,8 +124,11 @@ class CNNNet(nn.Module):
         
         return x
 
-    # Feed Forward for global view convolutional column
     def forward_conv_global(self, x):
+        '''
+        Feed Forward for global view convolutional column
+        '''
+
         x = F.relu(self.conv_in_global(x))
         x = F.relu(self.conv_1_global(x))
         x = self.maxpool_global(x)             
@@ -141,8 +147,11 @@ class CNNNet(nn.Module):
         
         return x
 
-    # Reset parameters if training net more than once
     def reset(self):
+        '''
+        Reset parameters if training net more than once
+        '''
+
         self.conv_in_local.reset_parameters()
         self.conv_1_local.reset_parameters()
         self.conv_2_local.reset_parameters()

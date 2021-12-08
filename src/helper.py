@@ -9,8 +9,8 @@ def precision(outputs, labels):
     '''
     count = 0
     for i in range(len(outputs)):
-        if outputs[i]==1.0 and labels[i]==1.0:
-            count+=1
+        if outputs[i] == 1.0 and labels[i] == 1.0:
+            count += 1
     total = sum(labels)
     if total == 0:
         prec = 0
@@ -27,8 +27,8 @@ def recall(outputs, labels):
     '''
     count = 0
     for i in range(len(outputs)):
-        if outputs[i]==1.0 and labels[i]==1.0:
-            count+=1
+        if outputs[i] == 1.0 and labels[i] == 1.0:
+            count += 1
 
     total = sum(outputs)
     if total == 0:
@@ -86,21 +86,19 @@ def compare_thresholds(outputs, labels, out_file):
     plt.ylabel("Precision")
     plt.xlabel("Recall")
     plt.savefig(out_file)
-    #plt.show()
     plt.close()
 
 
 def performance(model, test_set):
     '''
-    Performance of the finished FCNN model using the test dataset. Calculates the Accuracy, Precision, AUC, Recall
-    fin_model : Last model of the FCNN
-    test_set : set of data to test the finished model
+    Performance of the finished model using the test dataset.
+    Calculates the Accuracy, Precision, AUC, Recall
+    fin_model : final trained model
+    test_set : set of data used to test the finished model
     '''
     
     inputs, labels = test_set[0][0], test_set[0][1][0]
-
     outputs = model(inputs)
-
     classification_threshold = 0.5
 
     labels = labels.detach().cpu().numpy().flatten()

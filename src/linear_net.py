@@ -3,12 +3,11 @@ import torch
 class LinNet(torch.nn.Module):
     def __init__(self, view, device):
         '''
-        Linear Neural Network with one layer, no hidden
+        Linear Neural Network with one layer, no hidden layers
         view : view of TCE data -> 'global' | 'local' | 'both'
         device : 'cuda' or 'cpu'
         '''
         super(LinNet, self).__init__() 
-        # super gives access to attributes in a superclass from the subclass that inherits from it
         self.view = view
         self.device = device
 
@@ -22,6 +21,9 @@ class LinNet(torch.nn.Module):
         self.fc1= torch.nn.Linear(size, 1)
 
     def forward(self, x):
+        '''
+        x : data input of size (batch size, 2201)
+        '''
 
         x = x.to(self.device)
         if self.view == 'local':
@@ -31,3 +33,10 @@ class LinNet(torch.nn.Module):
             
         y = torch.sigmoid(self.fc1(x))
         return y
+
+
+    def reset(self):
+        '''
+        Reset parameters if training net more than once
+        '''
+        self.fc1.reset_parameters()

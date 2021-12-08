@@ -9,7 +9,7 @@ class FCNet(nn.Module):
         size : size of data
         view : view of TCE data -> 'global' | 'local' | 'both'
         '''
-        super(FCNet, self).__init__()  # super gives access to attributes in a superclass from the subclass that inherits from it
+        super(FCNet, self).__init__()
         self.view = view
         self.device = device
 
@@ -42,13 +42,12 @@ class FCNet(nn.Module):
             self.fcb5 = nn.Linear(50, 20)
             self.fcb6 = nn.Linear(20, 1)
 
-        # Define dropout layer
+        # Dropout layer
         self.dropout = nn.Dropout(0.5)
 
     def forward(self, x):
         '''
-        Feed forward propogation
-        x : data input of batch size by 2201
+        x : data input of size (batch size, 2201)
         '''
 
         x = x.to(self.device)
@@ -89,3 +88,47 @@ class FCNet(nn.Module):
             y = torch.sigmoid(self.fcb6(b5))
 
         return y
+
+    def reset(self):
+        '''
+        Reset parameters if training net more than once
+        '''
+        self.a1.reset_parameters()
+        self.a2.reset_parameters()
+        self.b1.reset_parameters()
+        self.b2.reset_parameters()
+        self.c1.reset_parameters()
+        self.c2.reset_parameters()
+        self.fca1.reset_parameters()
+        self.fca2.reset_parameters()
+        self.fca3.reset_parameters()
+        self.fca4.reset_parameters()
+        self.fca5.reset_parameters()
+        self.fca6.reset_parameters()
+        self.fcb1.reset_parameters()
+        self.fcb2.reset_parameters()
+        self.fcb3.reset_parameters()
+        self.fcb4.reset_parameters()
+        self.fcb5.reset_parameters()
+        self.fcb6.reset_parameters()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

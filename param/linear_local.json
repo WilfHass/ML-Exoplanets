@@ -8,14 +8,14 @@
 		"weight decay": 0.0
 	},
 	"training":{
-		"num epochs": 200,
+		"num epochs": 10,
 		"batch size": 64
 	},
 	"testing":{
 		"batch size": 787
 	},
 	"output":{
-		"tuned params" : "test"
+		"tuned params" : "garbage"
 	}
 }
 

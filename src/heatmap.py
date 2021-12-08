@@ -1,5 +1,4 @@
 import sys, os
-import torch
 import numpy as np
 import matplotlib.pylab as plt
 
@@ -9,19 +8,17 @@ from load_data import *
 
 
 def get_planets(input_folder):
-    '''get_planets gets all of the planet light curve data
+    '''
+    get_planets gets all of the planet light curve data
     input_folder : path to the input data folder 
     '''
 
-    # This gets all the training data that was a planet
     train_data, test_data = getData(input_folder)
     train_dataset = list(Data(train_data))
     planet_view = []
 
     for i in range(len(train_dataset)):
         if train_dataset[i][1][0] == 1.0:
-
-            # Changed from [i][1] to [i][1][0] for the new list format of the labels
             planet_view.append(train_dataset[i][0])
             
     return planet_view
@@ -30,16 +27,16 @@ def get_planets(input_folder):
 def create_heatmap(model, input_folder, view, filename):
     planet_tce = get_planets(input_folder)
     
-    # Randomly chose one of the spectra for the heat map (choosing a view)
+    # 'Randomly' choose one of the spectra for the heat map (choosing a view)
     index = 2
-    if view=='local':
+    if view == 'local':
         chosen_spectrum = planet_tce[index][:201]
-    elif view=='global':
+    elif view == 'global':
         chosen_spectrum = planet_tce[index][201:]
     else:
         chosen_spectrum = planet_tce[index]
 
-    # Creating a window that will move along the points and turn those points to zero
+    # Create a window that will move along the points and turn those points to zero
     window = np.arange(-49, 1, 1)
     ones = np.ones(50)
     
@@ -47,18 +44,18 @@ def create_heatmap(model, input_folder, view, filename):
     probabilities = []
     
     # The window will move as long as the first element of window is less than the last element of the spectrum
-    while window[0]<=len(chosen_spectrum):
+    while window[0] <= len(chosen_spectrum):
 
         # The new spectrum that will have certain values become zero
         new_spectrum = torch.tensor([i for i in planet_tce[index]])
         
         # The positions that are seen in window will become zero 
         for i in window:
-            if i>=0 and i<len(chosen_spectrum):
+            if i >= 0 and i < len(chosen_spectrum):
                 new_spectrum[int(i)] = 0.0
                 
         # Probability of the new spectrum being a planet
-        new_data = new_spectrum.view(1, -1) # torch.reshape(new_spectrum, (1,len(new_spectrum)))
+        new_data = new_spectrum.view(1, -1)
         prob = model(new_data)
         
         # Add this specific window and its probability to a list
@@ -66,7 +63,7 @@ def create_heatmap(model, input_folder, view, filename):
         probabilities.append(prob)
         
         #Move the window
-        window = window+ones
+        window = window + ones
 
     heats = []
     for i in range(len(chosen_spectrum)):
@@ -80,11 +77,11 @@ def create_heatmap(model, input_folder, view, filename):
         # Average the probabilities of all the windows that had the chosen spectrum index
         heatsum = 0
         for j in indices:
-            heatsum+=probabilities[j]
-        heats.append(heatsum/len(indices))
+            heatsum += probabilities[j]
+        heats.append(heatsum / len(indices))
     
-    x = np.arange(0,len(chosen_spectrum),1)
-    plt.scatter(x,chosen_spectrum,c=heats)
+    x = np.arange(0, len(chosen_spectrum), 1)
+    plt.scatter(x, chosen_spectrum, c=heats)
     plt.colorbar()
     plt.savefig(filename)
     plt.close()
