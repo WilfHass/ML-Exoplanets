@@ -81,5 +81,6 @@ def create_heatmap(model, input_folder, view, filename):
     plt.scatter(x,chosen_spectrum,c=heats)
     plt.colorbar()
     plt.savefig(filename)
-    plt.show()
+    #plt.show()
+    plt.close()
  

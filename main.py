@@ -21,6 +21,7 @@ if __name__ == '__main__':
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     print("Start Time =", current_time)
+    print()
     
     parser = argparse.ArgumentParser(description='Main file combining all three networks')
     parser.add_argument('--input', default=os.path.join('data', 'torch_data_ID'), type=str, help="location for input data files")
@@ -41,7 +42,6 @@ if __name__ == '__main__':
     
     if args.param is None:
         param_file = args.network + "_" + args.view + ".json"
-        print(param_file)
     else:
         param_file = args.param
 
@@ -262,9 +262,13 @@ if __name__ == '__main__':
 
     # Format: [kepid, tce_plnt_num, label, prediction, difference]
     # Print 5 best predictions; first rows in the array
+    print("5 best prdicitons:")
     print(IDs[:5, :])
+    print()
     # Print 5 worst predictions; last rows in the array
+    print("5 worst predictions:")
     print(IDs[-5:, :])
+    print()
 
 
     # Print end time
@@ -310,5 +314,4 @@ if __name__ == '__main__':
             torch.save(output, os.path.join(res_path, 'testing_probabilities', network, view, res_file + '.pt'))
 
             # Plot precision-recall plot
-            print(os.path.join(res_path, 'plots', network, view, 'precision_recall_' + res_file + '.png'))
             compare_thresholds(output[:,3], output[:,2], os.path.join(res_path, 'plots', network, view, 'precision_recall_' + res_file + '.png'))
