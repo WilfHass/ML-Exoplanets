@@ -84,8 +84,6 @@ def compare_thresholds(outputs, labels, out_file):
             pre_list.append(prec)
             rec_list.append(rec)
 
-#     print(pre_list, rec_list)
-
     plt.plot(rec_list, pre_list)
     plt.ylabel("Precision")
     plt.xlabel("Recall")
