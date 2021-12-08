@@ -17,7 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 pwd = os.getcwd()
         
 if __name__ == '__main__':
-    
+
     # Print start time
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
@@ -262,13 +262,14 @@ if __name__ == '__main__':
 
     # Format: [kepid, tce_plnt_num, label, prediction, difference]
     # Print 5 best predictions; first rows in the array
-    print("5 best prdicitons:")
-    print(IDs[:5, :])
-    print()
-    # Print 5 worst predictions; last rows in the array
-    print("5 worst predictions:")
-    print(IDs[-5:, :])
-    print()
+    if verbosity:
+        print("5 best predictions:")
+        print(IDs[:5, :])
+        print()
+        # Print 5 worst predictions; last rows in the array
+        print("5 worst predictions:")
+        print(IDs[-5:, :])
+        print()
 
 
     # Print end time
