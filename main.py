@@ -11,6 +11,7 @@ from fc_net import FCNet
 from linear_net import LinNet
 from helper import compare_thresholds, performance
 from heatmap import *
+from plotbestworst import *
 
 from torch.utils.tensorboard import SummaryWriter
 
