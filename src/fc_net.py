@@ -52,7 +52,6 @@ class FCNet(nn.Module):
         '''
 
         x = x.to(self.device)
-        # DOUBLE CHECK SLICING (upper limit is exclusive so only goes up to 200 and 2200)
         local_data = x[:, :201]
         global_data = x[:, 201:]
 

@@ -1,12 +1,9 @@
-import argparse
-import os
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import roc_auc_score
-import torch
 
 
-def precision(outputs,labels): 
+def precision(outputs, labels): 
     '''
     Computes the precision for a given output and label set
     '''
@@ -84,8 +81,6 @@ def compare_thresholds(outputs, labels, out_file):
             pre_list.append(prec)
             rec_list.append(rec)
 
-#     print(pre_list, rec_list)
-
     plt.plot(rec_list, pre_list)
     plt.ylabel("Precision")
     plt.xlabel("Recall")
@@ -126,25 +121,3 @@ def performance(model, test_set):
     rec = recall(classified_outputs, labels)
 
     return [acc, prec, rec, AUC]
-
-
-def optimize(model, batchlist, params):
-
-    epoch_num = params.epoch
-    optim = torch.optim.Adam(model.parameters(), lr=params.lr, betas=(0.9, 0.99), amsgrad=False)
-    # optim = torch.optim.SGD(model.parameters(),lr=params.lr, momentum=params.mom)
-    loss_fn = torch.nn.BCELoss()
-
-    for e in range(epoch_num):
-        
-        for data in batchlist:
-            inputs, labels = data[0], data[1]
-            outputs = model.forward(inputs)
-            r_outputs = torch.reshape(outputs, (-1,))
-            loss = loss_fn(r_outputs,labels)
-            loss.backward()
-            optim.step()
-            optim.zero_grad()
-
-        if e % 10 == 0:
-            print("Epoch [{}/{}] \t Loss: {}".format(e, epoch_num, loss.item()))

@@ -2,6 +2,11 @@ import torch
 
 class LinNet(torch.nn.Module):
     def __init__(self, view, device):
+        '''
+        Linear Neural Network with one layer, no hidden
+        view : view of TCE data -> 'global' | 'local' | 'both'
+        device : 'cuda' or 'cpu'
+        '''
         super(LinNet, self).__init__() 
         # super gives access to attributes in a superclass from the subclass that inherits from it
         self.view = view

@@ -6,8 +6,8 @@ class CNNNet(nn.Module):
     def __init__(self, view, device):
         '''
         Convolutional Neural Network
-        size : size of data
         view : view of TCE data -> 'global' | 'local' | 'both'
+        device : 'cuda' or 'cpu'
         '''
         super(CNNNet, self).__init__()
 
@@ -59,11 +59,8 @@ class CNNNet(nn.Module):
 
         # FC layers for all views
         self.fc_1 = nn.Linear(512, 512, bias=True)
-        self.fc_2 = nn.Linear(512, 512 , bias=True)
+        self.fc_2 = nn.Linear(512, 512, bias=True)
         self.fc_out = nn.Linear(512, 1, bias=True)
-
-        # Dropout regularization (not used for paper's best model)
-        self.dropout = nn.Dropout(0.3)
 
 
     # Feed forward
