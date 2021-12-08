@@ -22,7 +22,7 @@ def get_data(input_folder):
     return planet_view
     
 
-def create_heatmap(model, input_folder, view):
+def create_heatmap(model, input_folder, view, filename):
     planet_tce = get_data(input_folder)
     
     # Randomly chose one of the spectra for the heat map (choosing a view)
@@ -80,5 +80,6 @@ def create_heatmap(model, input_folder, view):
     x = np.arange(0,len(chosen_spectrum),1)
     plt.scatter(x,chosen_spectrum,c=heats)
     plt.colorbar()
+    plt.savefig(filename)
     plt.show()
  

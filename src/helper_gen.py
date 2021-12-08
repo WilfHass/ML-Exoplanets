@@ -89,7 +89,7 @@ def compare_thresholds(outputs, labels, out_file):
     plt.plot(rec_list, pre_list)
     plt.ylabel("Precision")
     plt.xlabel("Recall")
-    plt.savefig(os.path.join('plots', out_file))
+    plt.savefig(out_file)
     plt.show()
     plt.close()
 
